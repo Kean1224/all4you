@@ -1,3 +1,4 @@
+// Admin Offers Page - Force Vercel Deployment Fix
 'use client';
 
 import { useState, useEffect } from 'react';
