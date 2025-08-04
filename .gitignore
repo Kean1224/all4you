@@ -49,6 +49,7 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+*.backup
 
 # Backend specific
 backend/uploads/

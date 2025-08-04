@@ -25,35 +25,36 @@ Set these in your Render service dashboard:
 
 **Go to:** Render Dashboard → Your Backend Service → Environment
 
-**Required Variables:**
+**Required Environment Variables for Render:**
 
-```
+```bash
+# Basic Configuration
 NODE_ENV=production
-NEXT_PUBLIC_BASE_URL=https://www.all4youauctions.co.za
-FRONTEND_URL=https://www.all4youauctions.co.za
 
-# Google Workspace SMTP Configuration
+# Frontend URLs (used in email templates and verification)
+FRONTEND_URL=https://www.all4youauctions.co.za
+NEXT_PUBLIC_BASE_URL=https://www.all4youauctions.co.za
+
+# JWT Authentication
+JWT_SECRET=your-super-secure-jwt-secret-change-this-now
+JWT_EXPIRES_IN=7d
+
+# SMTP Email Configuration (Google Workspace)
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=admin@all4youauctions.co.za
-SMTP_PASS=your-app-password-here
+SMTP_PASS=your-google-app-password-here
 SMTP_FROM=admin@all4youauctions.co.za
 
-# Alternative SMTP variable names for compatibility
-EMAIL_HOST=smtp.gmail.com
-EMAIL_PORT=587
-EMAIL_USER=admin@all4youauctions.co.za
-EMAIL_PASS=your-app-password-here
-
-# Security
-JWT_SECRET=your-super-secret-jwt-key-change-this-now
-JWT_EXPIRES_IN=7d
-
-# Debug
+# Email Debug (Optional)
 EMAIL_DEBUG=false
 ```
 
-**Important:** Replace `your-app-password-here` with your actual Google App Password.
+**⚠️ Important Notes:**
+- `PORT` is automatically set by Render (usually 10000)
+- `ADMIN_EMAIL` and `ADMIN_PASSWORD` are hardcoded in your backend
+- `CORS_ORIGIN` is hardcoded in `cors-config.js`
+- Replace `your-google-app-password-here` with your actual Google App Password
 
 ## Deployment Steps
 
