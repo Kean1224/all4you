@@ -153,6 +153,7 @@ const NotificationCard: React.FC<{
       initial="initial"
       animate="animate"
       exit="exit"
+      transition={{ duration: 0.3, ease: "easeOut" }}
       className={`bg-black/80 backdrop-blur-sm border ${getBorderColor()} ${getBackgroundColor()} rounded-xl p-4 shadow-lg min-w-[320px]`}
     >
       <div className="flex items-start gap-3">
