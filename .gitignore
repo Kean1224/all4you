@@ -1,0 +1,63 @@
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Build outputs
+.next/
+*/build/
+*/.next/
+*/dist/
+
+# Environment variables
+.env
+.env.local
+.env.production
+.env.domain-example
+*.env
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+
+# VS Code settings
+.vscode/
+!.vscode/tasks.json
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+
+# Backend specific
+backend/uploads/
+backend/data/*.json
+!backend/data/auctions.json
+
+# Frontend specific
+frontend/.next/
+frontend/build/
+frontend/out/
+
+# Package lock files (keep only one)
+yarn.lock
+package-lock.json
+!package-lock.json

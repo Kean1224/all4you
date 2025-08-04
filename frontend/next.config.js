@@ -1,5 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Vercel optimization
+  experimental: {
+    optimizeCss: true,
+  },
+  
+  // Production build optimizations
+  swcMinify: true,
+  
   async rewrites() {
     // Only use rewrites in development
     if (process.env.NODE_ENV === 'development') {
@@ -11,6 +19,32 @@ const nextConfig = {
       ];
     }
     return [];
+  },
+  
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'origin-when-cross-origin',
+          },
+        ],
+      },
+    ];
   },
   images: {
     remotePatterns: [
