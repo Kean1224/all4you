@@ -1,10 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Vercel optimization
-  experimental: {
-    optimizeCss: true,
-  },
-  
   // Production build optimizations - swcMinify is now default in Next.js 15
   
   async rewrites() {
