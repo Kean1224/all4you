@@ -13,7 +13,7 @@ NEXT_PUBLIC_BACKEND_URL=https://api.all4youauctions.co.za
 NEXT_PUBLIC_WS_URL=wss://api.all4youauctions.co.za
 
 # Frontend Configuration  
-NEXT_PUBLIC_BASE_URL=https://your-vercel-app.vercel.app
+NEXT_PUBLIC_BASE_URL=https://www.all4youauctions.co.za
 
 # Node Environment
 NODE_ENV=production
@@ -29,18 +29,20 @@ NODE_ENV=production
    - **Value**: Variable value (e.g., `https://api.all4youauctions.co.za`)
    - **Environment**: Select "Production", "Preview", and "Development"
 
-### 3. Automatic Domain Update:
+### 3. Custom Domain Configuration:
 
-Once deployed, update `NEXT_PUBLIC_BASE_URL` to your actual Vercel domain:
-```bash
-NEXT_PUBLIC_BASE_URL=https://all4you-auction.vercel.app
-```
+Your custom domain: `www.all4youauctions.co.za`
+1. Add your domain in Vercel project settings → Domains
+2. Configure DNS records as instructed by Vercel:
+   - Add CNAME record: `www` → `cname.vercel-dns.com`
+   - Or A record pointing to Vercel's IP addresses
+3. Vercel will automatically provision SSL certificate
 
 ### 4. Backend Integration:
 
 Make sure your backend (if deployed separately) has CORS configured to allow:
-- `https://your-vercel-app.vercel.app`
-- `https://all4you-auction.vercel.app` (or your actual domain)
+- `https://www.all4youauctions.co.za`
+- `https://api.all4youauctions.co.za`
 
 ### 5. Deployment Commands:
 
