@@ -93,11 +93,10 @@ export const ConnectionStatus: React.FC = () => {
     };
 
     const updateConnectionType = () => {
-      // @ts-ignore - connection API is experimental
+      // Connection API is experimental and not fully typed
       if ('connection' in navigator) {
-        // @ts-ignore
-        const connection = navigator.connection;
-        setConnectionType(connection.effectiveType || '');
+        const connection = (navigator as any).connection;
+        setConnectionType(connection?.effectiveType || '');
       }
     };
 
