@@ -1,0 +1,17 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Start Real-Time Auction Platform",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-Command",
+				"Write-Host '🚀 Starting Real-Time Auction Platform with WebSocket Support...' -ForegroundColor Green; cd backend; Start-Process powershell -ArgumentList '-NoExit', '-Command', 'npm start' -WindowStyle Normal; Start-Sleep 3; cd ../frontend; Start-Process powershell -ArgumentList '-NoExit', '-Command', 'npm run dev' -WindowStyle Normal; Write-Host '✅ Both servers starting...' -ForegroundColor Green; Write-Host '📡 Backend (with WebSocket): http://localhost:5000' -ForegroundColor Cyan; Write-Host '🌐 Frontend: http://localhost:3000' -ForegroundColor Cyan; Write-Host '🔗 WebSocket Server: ws://localhost:5050' -ForegroundColor Yellow"
+			],
+			"group": "build",
+			"isBackground": false,
+			"problemMatcher": []
+		}
+	]
+}
