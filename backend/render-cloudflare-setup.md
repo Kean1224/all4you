@@ -1,34 +1,49 @@
-# Render + Cloudflare Email Verification Fix
+# Render Deployment Setup for All4You Auctions Backend
 
-## Current Issue
-Your Render-hosted backend is still using development environment variables, causing verification emails to contain `localhost:3000` URLs instead of `https://all4youauctions.co.za`.
+## Quick Deploy to Render
 
-## Solution Steps
+### Option 1: Auto Deploy (Recommended)
+1. Connect your GitHub repository to Render
+2. Use the `render.yaml` file in the root directory for automatic configuration
+3. Set sensitive environment variables in Render Dashboard
 
-### 1. Render Dashboard Environment Variables
-You need to set these environment variables in your Render service dashboard:
+### Option 2: Manual Setup
+Create a new Web Service in Render Dashboard with these settings:
+
+## Render Service Configuration
+
+### Basic Settings
+- **Name:** all4you-backend
+- **Environment:** Node
+- **Plan:** Free (upgrade as needed)
+- **Build Command:** `npm install`
+- **Start Command:** `node index.js`
+- **Root Directory:** `backend` (if deploying from monorepo)
+
+### Environment Variables
+Set these in your Render service dashboard:
 
 **Go to:** Render Dashboard → Your Backend Service → Environment
 
-**Add these exact variables:**
+**Required Variables:**
 
 ```
 NODE_ENV=production
-NEXT_PUBLIC_BASE_URL=https://all4youauctions.co.za
-FRONTEND_URL=https://all4youauctions.co.za
+NEXT_PUBLIC_BASE_URL=https://www.all4youauctions.co.za
+FRONTEND_URL=https://www.all4youauctions.co.za
 
-# Google Workspace SMTP (Working)
+# Google Workspace SMTP Configuration
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=admin@all4youauctions.co.za
-SMTP_PASS=ammlhjaflqqadnrv
+SMTP_PASS=your-app-password-here
 SMTP_FROM=admin@all4youauctions.co.za
 
-# Alternative names for compatibility
+# Alternative SMTP variable names for compatibility
 EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
 EMAIL_USER=admin@all4youauctions.co.za
-EMAIL_PASS=ammlhjaflqqadnrv
+EMAIL_PASS=your-app-password-here
 
 # Security
 JWT_SECRET=your-super-secret-jwt-key-change-this-now
@@ -38,56 +53,110 @@ JWT_EXPIRES_IN=7d
 EMAIL_DEBUG=false
 ```
 
-### 2. Render Service Settings
-- **Port:** Render automatically handles this (usually 10000)
-- **Build Command:** `npm install` (if applicable)
-- **Start Command:** `node index.js`
+**Important:** Replace `your-app-password-here` with your actual Google App Password.
 
-### 3. Cloudflare DNS Settings
-Since you're using Cloudflare for DNS:
-- Point your domain to Render's servers
-- Can use either Orange Cloud (proxied) or Gray Cloud (DNS only)
-- SSL/TLS mode should be "Full" for HTTPS
+## Deployment Steps
 
-### 4. Deploy Process
-1. **Set Environment Variables** in Render Dashboard
-2. **Redeploy** your Render service (or it auto-deploys)
-3. **Test** verification emails
+### 1. Deploy to Render
+1. **Connect Repository:**
+   - Go to [Render Dashboard](https://dashboard.render.com)
+   - Click "New +" → "Web Service"
+   - Connect your GitHub repository `kean1224/all4you`
 
-## Quick Test Commands
+2. **Configure Service:**
+   - **Name:** all4you-backend
+   - **Root Directory:** `backend` (if using monorepo)
+   - **Environment:** Node
+   - **Build Command:** `npm install`
+   - **Start Command:** `node index.js`
 
-After updating Render environment variables, test with:
+3. **Set Environment Variables:**
+   - Add all the variables listed above in the Render dashboard
+   - Use the "Add Environment Variable" button for each one
 
+### 2. Custom Domain Setup
+1. **In Render Dashboard:**
+   - Go to your service → Settings → Custom Domains
+   - Add: `api.all4youauctions.co.za`
+
+2. **In Cloudflare DNS:**
+   - Add CNAME record: `api` → `your-render-url.onrender.com`
+   - Set to "Proxied" (Orange Cloud)
+
+### 3. SSL/TLS Configuration
+- **Cloudflare SSL/TLS Mode:** Full (Strict)
+- Render automatically provides SSL certificates
+
+## Testing Your Deployment
+
+### 1. Health Check
 ```bash
-# Test endpoint to check environment
-curl https://all4youauctions.co.za/api/ping
+# Test if backend is running
+curl https://api.all4youauctions.co.za/health
 
-# Check if backend is using correct URLs
-curl https://all4youauctions.co.za/health
+# Test environment configuration
+curl https://api.all4youauctions.co.za/api/ping
 ```
 
-## Common Render Issues
+### 2. Email Testing
+```bash
+# Test email verification
+curl -X POST https://api.all4youauctions.co.za/api/auth/test-email \
+  -H "Content-Type: application/json" \
+  -d '{"email": "test@example.com"}'
+```
 
-### If emails still show localhost:
-1. Environment variables not saved in Render dashboard
-2. Service not redeployed after environment change
-3. Code still has hardcoded localhost URLs
+## Frontend Configuration Update
 
-### If service won't start:
-1. Check Render logs for environment variable errors
-2. Verify all required variables are set
-3. Make sure JWT_SECRET is updated from default
+Update your frontend to use the Render backend URL:
 
-## Render-Specific Notes
+**File:** `frontend/.env.production`
+```
+NEXT_PUBLIC_API_URL=https://api.all4youauctions.co.za
+NEXT_PUBLIC_WS_URL=wss://api.all4youauctions.co.za
+NEXT_PUBLIC_BASE_URL=https://www.all4youauctions.co.za
+```
 
-- Render automatically restarts services when environment variables change
-- No need to upload .env files - use Render dashboard
-- Render handles HTTPS automatically
-- PORT is managed by Render (usually 10000)
+## Troubleshooting
 
-## Next Steps
-1. Go to Render Dashboard
-2. Add the environment variables above
-3. Redeploy if needed
-4. Test registration on your live site
-5. Verify email links use correct domain
+### Backend Won't Start
+1. Check Render service logs
+2. Verify all environment variables are set
+3. Ensure `package.json` has correct start script
+
+### CORS Issues
+- Frontend URL must be in CORS whitelist
+- Check that `FRONTEND_URL` environment variable is correct
+
+### Email Issues
+- Verify Google App Password is correct
+- Check SMTP settings in environment variables
+- Test email configuration with the test endpoint
+
+### WebSocket Issues
+- Render supports WebSockets on paid plans
+- Free tier may have limitations for real-time features
+
+## Monitoring and Maintenance
+
+### Render Dashboard
+- Monitor service health and logs
+- Set up alerts for downtime
+- Review resource usage
+
+### Domain Management
+- Monitor SSL certificate status
+- Check Cloudflare analytics
+- Review security settings
+
+## Production Checklist
+
+- [ ] Environment variables set in Render
+- [ ] Custom domain configured
+- [ ] SSL/TLS working
+- [ ] Email system functional
+- [ ] Frontend pointing to correct API URL
+- [ ] WebSocket server operational
+- [ ] CORS properly configured
+- [ ] File uploads working
+- [ ] Database connections stable

@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: all4you-backend
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_BASE_URL
+        value: https://www.all4youauctions.co.za
+      - key: FRONTEND_URL
+        value: https://www.all4youauctions.co.za
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: EMAIL_DEBUG
+        value: false
+    # These environment variables should be set in Render Dashboard for security:
+    # SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM
+    # EMAIL_HOST, EMAIL_PORT, EMAIL_USER, EMAIL_PASS

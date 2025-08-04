@@ -1,4 +1,9 @@
-# Vercel Environment Variables Setup Guide
+# Vercel + Render Deployment Setup Guide
+
+## Architecture Overview
+- **Frontend:** Vercel (Next.js) - https://www.all4youauctions.co.za
+- **Backend:** Render (Node.js) - https://api.all4youauctions.co.za
+- **Domain:** Cloudflare DNS Management
 
 ## Required Environment Variables for Vercel Deployment
 
@@ -7,7 +12,7 @@
 Add these in your Vercel project settings under "Environment Variables":
 
 ```bash
-# API Configuration
+# Backend API Configuration (Render)
 NEXT_PUBLIC_API_URL=https://api.all4youauctions.co.za
 NEXT_PUBLIC_BACKEND_URL=https://api.all4youauctions.co.za
 NEXT_PUBLIC_WS_URL=wss://api.all4youauctions.co.za
