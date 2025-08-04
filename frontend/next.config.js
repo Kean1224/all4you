@@ -5,8 +5,7 @@ const nextConfig = {
     optimizeCss: true,
   },
   
-  // Production build optimizations
-  swcMinify: true,
+  // Production build optimizations - swcMinify is now default in Next.js 15
   
   async rewrites() {
     // Only use rewrites in development
