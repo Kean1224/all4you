@@ -1,10 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function TestApiPage() {
   const [apiStatus, setApiStatus] = useState('Not tested');
   const [loading, setLoading] = useState(false);
+  const [frontendUrl, setFrontendUrl] = useState('Loading...');
+
+  useEffect(() => {
+    // Set client-side only values
+    if (typeof window !== 'undefined') {
+      setFrontendUrl(window.location.origin);
+    }
+  }, []);
 
   const testAPI = async () => {
     setLoading(true);
@@ -29,7 +37,7 @@ export default function TestApiPage() {
         
         <div className="space-y-4">
           <div>
-            <strong>Frontend URL:</strong> {window.location.origin}
+            <strong>Frontend URL:</strong> {frontendUrl}
           </div>
           <div>
             <strong>API URL:</strong> {process.env.NEXT_PUBLIC_API_URL}
