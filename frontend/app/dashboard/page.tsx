@@ -105,18 +105,20 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-yellow-200 via-white to-blue-200 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-yellow-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900 relative overflow-hidden flex items-center justify-center">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary-500/5 to-purple-500/10 pointer-events-none"></div>
+        <div className="relative z-10 animate-spin rounded-full h-32 w-32 border-b-2 border-primary-400"></div>
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-yellow-200 via-white to-blue-200 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600 mb-4">Unable to load user data</p>
-          <Link href="/login" className="text-yellow-600 hover:text-yellow-700 font-semibold">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900 relative overflow-hidden flex items-center justify-center">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary-500/5 to-purple-500/10 pointer-events-none"></div>
+        <div className="relative z-10 text-center">
+          <p className="text-red-400 mb-4">Unable to load user data</p>
+          <Link href="/login" className="text-primary-400 hover:text-primary-300 font-semibold">
             Please log in again
           </Link>
         </div>
@@ -125,55 +127,57 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-yellow-200 via-white to-blue-200 py-8 px-4">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900 relative overflow-hidden py-8 px-4">
+      <div className="absolute inset-0 bg-gradient-to-br from-primary-500/5 to-purple-500/10 pointer-events-none"></div>
+      <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary-500/10 via-transparent to-transparent pointer-events-none"></div>
+      <div className="relative z-10 max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-yellow-600 mb-2">Welcome Back, {user.name}!</h1>
-          <p className="text-gray-600">Manage your auctions, bids, and account settings</p>
+          <h1 className="text-4xl font-bold text-white mb-2 font-sora">Welcome Back, {user.name}!</h1>
+          <p className="text-white/80 font-inter">Manage your auctions, bids, and account settings</p>
         </div>
 
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl mb-6">
+          <div className="bg-red-500/20 border border-red-500/30 text-red-300 px-4 py-3 rounded-xl mb-6 backdrop-blur-sm">
             {error}
           </div>
         )}
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Link href="/auctions" className="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-yellow-200 p-6 hover:shadow-xl transition-all group">
+          <Link href="/auctions" className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 p-6 hover:bg-white/20 hover:border-primary-500/50 transition-all group transform hover:scale-105">
             <div className="text-center">
-              <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-yellow-100 flex items-center justify-center group-hover:bg-yellow-200 transition-colors">
+              <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-primary-500/20 flex items-center justify-center group-hover:bg-primary-500/30 transition-colors">
                 <span className="text-2xl">🏆</span>
               </div>
-              <h3 className="font-semibold text-gray-800">Browse Auctions</h3>
-              <p className="text-sm text-gray-600 mt-1">Find items to bid on</p>
+              <h3 className="font-semibold text-white font-inter">Browse Auctions</h3>
+              <p className="text-sm text-white/70 mt-1">Find items to bid on</p>
             </div>
           </Link>
 
-          <Link href="/sell" className="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-yellow-200 p-6 hover:shadow-xl transition-all group">
+          <Link href="/sell" className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 p-6 hover:bg-white/20 hover:border-primary-500/50 transition-all group transform hover:scale-105">
             <div className="text-center">
-              <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-blue-100 flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+              <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-blue-500/20 flex items-center justify-center group-hover:bg-blue-500/30 transition-colors">
                 <span className="text-2xl">💰</span>
               </div>
-              <h3 className="font-semibold text-gray-800">Sell Item</h3>
-              <p className="text-sm text-gray-600 mt-1">List your items</p>
+              <h3 className="font-semibold text-white font-inter">Sell Item</h3>
+              <p className="text-sm text-white/70 mt-1">List your items</p>
             </div>
           </Link>
 
-          <Link href="/account" className="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-yellow-200 p-6 hover:shadow-xl transition-all group">
+          <Link href="/account" className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 p-6 hover:bg-white/20 hover:border-primary-500/50 transition-all group transform hover:scale-105">
             <div className="text-center">
-              <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-green-100 flex items-center justify-center group-hover:bg-green-200 transition-colors">
+              <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-green-500/20 flex items-center justify-center group-hover:bg-green-500/30 transition-colors">
                 <span className="text-2xl">👤</span>
               </div>
-              <h3 className="font-semibold text-gray-800">My Account</h3>
-              <p className="text-sm text-gray-600 mt-1">Manage profile & FICA</p>
+              <h3 className="font-semibold text-white font-inter">My Account</h3>
+              <p className="text-sm text-white/70 mt-1">Manage profile & FICA</p>
             </div>
           </Link>
 
-          <Link href="/watchlist" className="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-yellow-200 p-6 hover:shadow-xl transition-all group">
+          <Link href="/watchlist" className="bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 p-6 hover:bg-white/20 hover:border-primary-500/50 transition-all group transform hover:scale-105">
             <div className="text-center">
-              <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-purple-100 flex items-center justify-center group-hover:bg-purple-200 transition-colors">
+              <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-purple-500/20 flex items-center justify-center group-hover:bg-purple-500/30 transition-colors">
                 <span className="text-2xl">👁️</span>
               </div>
               <h3 className="font-semibold text-gray-800">Watchlist</h3>
