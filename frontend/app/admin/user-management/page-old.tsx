@@ -184,7 +184,7 @@ export default function AdminUserManagementPage() {
                     >
                       Review
                     </button>
-                    {user.idDocument && user.proofOfAddress && (
+                    {user.documents?.idDocument && user.documents?.proofOfAddress && (
                       <button
                         onClick={() => {
                           setSelectedUser(user);
