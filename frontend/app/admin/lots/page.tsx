@@ -66,12 +66,16 @@ export default function AdminLotsPage() {
       
       if (activeResponse.ok) {
         const activeAuctions = await activeResponse.json();
-        allAuctions = [...allAuctions, ...activeAuctions];
+        if (Array.isArray(activeAuctions)) {
+          allAuctions = [...allAuctions, ...activeAuctions];
+        }
       }
       
       if (pastResponse.ok) {
         const pastAuctions = await pastResponse.json();
-        allAuctions = [...allAuctions, ...pastAuctions];
+        if (Array.isArray(pastAuctions)) {
+          allAuctions = [...allAuctions, ...pastAuctions];
+        }
       }
       
       // Sort by creation date (newest first)
@@ -83,6 +87,7 @@ export default function AdminLotsPage() {
       console.log('Fetched auctions with lots:', allAuctions);
     } catch (error) {
       console.error('Error fetching auctions:', error);
+      setAuctions([]);
       alert('Failed to fetch auctions');
     }
   };
@@ -90,12 +95,21 @@ export default function AdminLotsPage() {
   const fetchUsers = async () => {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users`);
+      if (!res.ok) {
+        throw new Error(`Failed to fetch users: ${res.status}`);
+      }
       const data = await res.json();
       // Show ALL users for admin (including suspended users, but exclude other admins)
-      setUsers(data.filter((u: User) => u.role !== 'admin'));
-      console.log('Fetched all registered users:', data.length);
+      if (Array.isArray(data)) {
+        setUsers(data.filter((u: User) => u.role !== 'admin'));
+        console.log('Fetched all registered users:', data.length);
+      } else {
+        console.warn('Users data is not an array:', data);
+        setUsers([]);
+      }
     } catch (error) {
       console.error('Error fetching users:', error);
+      setUsers([]);
     }
   };
 
@@ -372,11 +386,11 @@ export default function AdminLotsPage() {
                               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                                 <div>
                                   <span className="font-medium text-gray-700">Start Price:</span>
-                                  <p className="text-green-600 font-bold">R{lot.startPrice.toLocaleString()}</p>
+                                  <p className="text-green-600 font-bold">R{(lot.startPrice || 0).toLocaleString()}</p>
                                 </div>
                                 <div>
                                   <span className="font-medium text-gray-700">Current Bid:</span>
-                                  <p className="text-blue-600 font-bold">R{(lot.currentBid || lot.startPrice).toLocaleString()}</p>
+                                  <p className="text-blue-600 font-bold">R{(lot.currentBid || lot.startPrice || 0).toLocaleString()}</p>
                                 </div>
                                 <div>
                                   <span className="font-medium text-gray-700">Condition:</span>
