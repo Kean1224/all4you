@@ -26,7 +26,7 @@ async function testEmailSystem() {
       
       // Test sending a verification email
       console.log('📧 Testing verification email send...');
-      const testEmail = 'test@example.com';
+      const testEmail = 'admin@all4youauctions.co.za';
       const verificationToken = 'test-token-123';
       const verificationUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/verify-email?token=${verificationToken}`;
       
