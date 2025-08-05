@@ -1,17 +1,17 @@
 services:
+  # Backend API Service
   - type: web
     name: all4you-backend
     env: node
     plan: free
+    rootDir: ./backend
     buildCommand: npm install
     startCommand: node index.js
     envVars:
       - key: NODE_ENV
         value: production
       - key: FRONTEND_URL
-        value: https://www.all4youauctions.co.za
-      - key: NEXT_PUBLIC_BASE_URL
-        value: https://www.all4youauctions.co.za
+        value: https://all4you-frontend.onrender.com
       - key: JWT_SECRET
         generateValue: true
       - key: JWT_EXPIRES_IN
@@ -27,3 +27,19 @@ services:
     # Set these sensitive variables manually in Render Dashboard:
     # SMTP_USER=admin@all4youauctions.co.za
     # SMTP_PASS=your-google-app-password
+
+  # Frontend Next.js Service
+  - type: web
+    name: all4you-frontend
+    env: node
+    plan: free
+    rootDir: ./frontend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_API_URL
+        value: https://all4you-backend.onrender.com
+      - key: NEXT_PUBLIC_BASE_URL
+        value: https://all4you-frontend.onrender.com
