@@ -34,7 +34,7 @@ export default function InvoiceTable({
             {data.map((item) => (
               <tr key={item.id} className="text-sm hover:bg-gray-50">
                 <td className="py-2 px-3 border-b">{item.item}</td>
-                <td className="py-2 px-3 border-b">R{item.price.toLocaleString()}</td>
+                <td className="py-2 px-3 border-b">R{(item.price || 0).toLocaleString()}</td>
                 <td className="py-2 px-3 border-b">{item.date}</td>
               </tr>
             ))}

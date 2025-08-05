@@ -208,7 +208,7 @@ export default function AuctionCard({ auction, index = 0 }: AuctionCardProps) {
               {auction.currentBid ? 'Current Bid' : 'Starting Price'}
             </p>
             <p className="text-2xl font-sora font-bold text-secondary-800">
-              R{currentBid.toLocaleString()}
+              R{(currentBid || 0).toLocaleString()}
             </p>
           </div>
           

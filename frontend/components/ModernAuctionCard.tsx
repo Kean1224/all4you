@@ -242,7 +242,7 @@ export default function ModernAuctionCard({ auction, index = 0 }: AuctionCardPro
               <div className="flex items-center gap-2 text-sm text-yellow-600">
                 <CurrencyDollarIcon className="w-4 h-4" />
                 <span className="font-medium">Deposit:</span>
-                <span>R{auction.depositAmount.toLocaleString()}</span>
+                <span>R{(auction.depositAmount || 0).toLocaleString()}</span>
               </div>
             )}
 

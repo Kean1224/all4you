@@ -87,7 +87,7 @@ export default function LotCard({ lot }: { lot: Lot }) {
       </div>
       <div className="p-4">
         <h3 className="text-lg font-bold text-gray-800 mb-2">{lot.title}</h3>
-        <p className="text-gray-600 mb-4">Current Bid: R{lot.currentBid.toLocaleString()}</p>
+        <p className="text-gray-600 mb-4">Current Bid: R{(lot.currentBid || 0).toLocaleString()}</p>
         <Link href={`/auctions/${lot.auctionId}/lot/${lot.id}`}>
           <button className="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded transition-colors">
             🔨 View & Bid

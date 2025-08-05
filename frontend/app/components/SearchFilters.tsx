@@ -228,7 +228,7 @@ export default function SearchFilters({ onFilterChange, lotCount }: SearchFilter
           {/* Price Range */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Price Range: R{filters.priceRange.min.toLocaleString()} - R{filters.priceRange.max.toLocaleString()}
+              Price Range: R{(filters.priceRange.min || 0).toLocaleString()} - R{(filters.priceRange.max || 0).toLocaleString()}
             </label>
             <div className="flex gap-4 items-center">
               <input

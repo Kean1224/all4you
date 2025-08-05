@@ -129,7 +129,7 @@ export default function AdminOffersPage() {
                     <p className="text-sm font-medium text-gray-700">Category:</p>
                     <p className="text-sm text-gray-600">{offer.category}</p>
                     <p className="text-sm font-medium text-gray-700 mt-2">Estimated Value:</p>
-                    <p className="text-sm text-gray-600">R{offer.estimatedValue?.toLocaleString()}</p>
+                    <p className="text-sm text-gray-600">R{(offer.estimatedValue || 0).toLocaleString()}</p>
                   </div>
                 </div>
 
