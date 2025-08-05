@@ -85,21 +85,29 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-secondary-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900 relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary-500/5 to-purple-500/10"></div>
+      <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary-500/10 via-transparent to-transparent"></div>
+      
       {/* Modern Header */}
-      <ModernHeader 
-        isLoggedIn={isLoggedIn}
-        userEmail={userEmail}
-        notificationCount={3}
-      />
+      <div className="relative z-10">
+        <ModernHeader 
+          isLoggedIn={isLoggedIn}
+          userEmail={userEmail}
+          notificationCount={3}
+        />
+      </div>
 
       {/* Hero Section */}
-      <HeroSection 
-        backgroundImage="/images/auction-hero.jpg"
-      />
+      <div className="relative z-10">
+        <HeroSection 
+          backgroundImage="/images/auction-hero.jpg"
+        />
+      </div>
 
       {/* Featured Auctions Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white">
+      <section className="relative z-10 py-16 px-4 sm:px-6 lg:px-8 bg-white/95 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto">
           
           {/* Section Header */}
@@ -166,7 +174,7 @@ export default function HomePage() {
       </section>
 
       {/* Features Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-secondary-50">
+      <section className="relative z-10 py-16 px-4 sm:px-6 lg:px-8 bg-white/90 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto">
           
           <motion.div
@@ -228,7 +236,7 @@ export default function HomePage() {
       </section>
 
       {/* Call to Action Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-secondary-800 to-secondary-900">
+      <section className="relative z-10 py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-slate-800/90 to-indigo-900/90 backdrop-blur-sm">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
