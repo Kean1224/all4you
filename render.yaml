@@ -11,7 +11,7 @@ services:
       - key: NODE_ENV
         value: production
       - key: FRONTEND_URL
-        value: https://all4you-frontend.onrender.com
+        value: https://www.all4youauctions.co.za
       - key: JWT_SECRET
         generateValue: true
       - key: JWT_EXPIRES_IN
@@ -42,4 +42,4 @@ services:
       - key: NEXT_PUBLIC_API_URL
         value: https://all4you-backend.onrender.com
       - key: NEXT_PUBLIC_BASE_URL
-        value: https://all4you-frontend.onrender.com
+        value: https://www.all4youauctions.co.za
