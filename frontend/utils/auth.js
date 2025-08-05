@@ -2,19 +2,19 @@
 
 export function setToken(token) {
   if (typeof window !== 'undefined') {
-    localStorage.setItem('jwt_token', token);
+    localStorage.setItem('admin_jwt', token);
   }
 }
 
 export function getToken() {
   if (typeof window !== 'undefined') {
-    return localStorage.getItem('jwt_token');
+    return localStorage.getItem('admin_jwt');
   }
   return null;
 }
 
 export function clearToken() {
   if (typeof window !== 'undefined') {
-    localStorage.removeItem('jwt_token');
+    localStorage.removeItem('admin_jwt');
   }
 }
