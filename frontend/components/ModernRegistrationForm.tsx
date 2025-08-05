@@ -161,9 +161,8 @@ export default function ModernRegistrationForm() {
 
       if (response.ok) {
         setSuccess(true);
-        setTimeout(() => {
-          router.push('/verify-email');
-        }, 2000);
+        // Don't redirect immediately - show success message and let user check email
+        // User should click the verification link from their email to complete registration
       } else {
         setError(data.error || data.message || 'Registration failed');
       }
