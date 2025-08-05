@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   UsersIcon,
@@ -54,6 +55,7 @@ type QuickAction = {
 };
 
 export default function ModernAdminDashboard() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('overview');
   const [stats, setStats] = useState<DashboardStats>({
     totalUsers: 0,
@@ -76,66 +78,154 @@ export default function ModernAdminDashboard() {
     try {
       setLoading(true);
       
-      // In a real app, these would be actual API calls
-      const [users, auctions, offers] = await Promise.all([
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`).then(res => res.json()).catch(() => []),
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/auctions`).then(res => res.json()).catch(() => []),
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/sell-item`).then(res => res.json()).catch(() => [])
-      ]);
+      const token = localStorage.getItem('adminToken');
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      };
+      
+      let users: any[] = [];
+      let auctions: any[] = [];
+      let offers: any[] = [];
 
+      // Fetch real data from API endpoints
+      try {
+        const usersRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users`, { headers });
+        if (usersRes.ok) {
+          users = await usersRes.json();
+        }
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      }
+
+      try {
+        const auctionsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auctions`, { headers });
+        if (auctionsRes.ok) {
+          auctions = await auctionsRes.json();
+        }
+      } catch (error) {
+        console.error('Error fetching auctions:', error);
+      }
+
+      try {
+        const offersRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sell-item/admin/all`, { headers });
+        if (offersRes.ok) {
+          offers = await offersRes.json();
+        }
+      } catch (error) {
+        console.error('Error fetching offers:', error);
+      }
+
+      // Calculate real statistics
       const lots = auctions.reduce((acc: number, auction: any) => acc + (auction.lots?.length || 0), 0);
       const activeAuctions = auctions.filter((auction: any) => auction.status === 'active').length;
+      const pendingOffers = offers.filter((offer: any) => offer.status === 'pending').length;
+      
+      // Calculate total revenue from completed lots
+      const totalRevenue = auctions.reduce((total: number, auction: any) => {
+        if (auction.lots) {
+          return total + auction.lots.reduce((auctionTotal: number, lot: any) => {
+            return auctionTotal + (lot.currentBid || 0);
+          }, 0);
+        }
+        return total;
+      }, 0);
 
       setStats({
-        totalUsers: users.length || 156,
-        totalAuctions: auctions.length || 23,
-        totalLots: lots || 487,
-        totalOffers: offers.length || 89,
-        activeAuctions: activeAuctions || 8,
-        pendingApprovals: 12,
-        totalRevenue: 127500,
-        monthlyGrowth: 23.5
+        totalUsers: users.length,
+        totalAuctions: auctions.length,
+        totalLots: lots,
+        totalOffers: offers.length,
+        activeAuctions: activeAuctions,
+        pendingApprovals: pendingOffers,
+        totalRevenue: totalRevenue,
+        monthlyGrowth: 0 // TODO: Calculate based on historical data
       });
 
-      // Mock recent activity
-      setRecentActivity([
-        {
-          id: '1',
+      // Get real recent activity
+      const recentActivities = [];
+      
+      // Recent user registrations
+      const recentUsers = users.filter((user: any) => {
+        const createdAt = new Date(user.createdAt);
+        const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+        return createdAt > oneDayAgo;
+      }).slice(0, 3);
+
+      recentUsers.forEach((user: any) => {
+        recentActivities.push({
+          id: `user-${user.id}`,
           type: 'user_registration',
-          message: 'New user registered: john.doe@email.com',
-          timestamp: '2024-01-20T14:30:00Z',
+          message: `New user registered: ${user.email}`,
+          timestamp: user.createdAt,
           status: 'success'
-        },
-        {
-          id: '2',
+        });
+      });
+
+      // Recent auctions
+      const recentAuctions = auctions.filter((auction: any) => {
+        const createdAt = new Date(auction.createdAt);
+        const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+        return createdAt > oneDayAgo;
+      }).slice(0, 2);
+
+      recentAuctions.forEach((auction: any) => {
+        recentActivities.push({
+          id: `auction-${auction.id}`,
           type: 'auction_created',
-          message: 'Estate Auction #EA-2024-001 created',
-          timestamp: '2024-01-20T13:15:00Z',
+          message: `New auction created: ${auction.title}`,
+          timestamp: auction.createdAt,
           status: 'success'
-        },
-        {
-          id: '3',
+        });
+      });
+
+      // Recent offers
+      const recentOffers = offers.filter((offer: any) => {
+        const createdAt = new Date(offer.createdAt);
+        const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+        return createdAt > oneDayAgo;
+      }).slice(0, 2);
+
+      recentOffers.forEach((offer: any) => {
+        recentActivities.push({
+          id: `offer-${offer.id}`,
           type: 'offer_submitted',
-          message: 'Sell offer submitted: Vintage Car Collection',
-          timestamp: '2024-01-20T12:45:00Z',
+          message: `New sell offer: ${offer.title}`,
+          timestamp: offer.createdAt,
           status: 'warning'
-        }
-      ]);
+        });
+      });
+
+      // Sort by timestamp (newest first)
+      recentActivities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      
+      setRecentActivity(recentActivities.slice(0, 10));
 
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
+      // Set default values if API fails
+      setStats({
+        totalUsers: 0,
+        totalAuctions: 0,
+        totalLots: 0,
+        totalOffers: 0,
+        activeAuctions: 0,
+        pendingApprovals: 0,
+        totalRevenue: 0,
+        monthlyGrowth: 0
+      });
     } finally {
       setLoading(false);
     }
   };
 
   const tabs = [
-    { id: 'overview', label: 'Overview', icon: ChartBarIcon },
-    { id: 'users', label: 'Users', icon: UsersIcon },
-    { id: 'auctions', label: 'Auctions', icon: TrophyIcon },
-    { id: 'offers', label: 'Offers', icon: TagIcon },
-    { id: 'invoices', label: 'Invoices', icon: DocumentDuplicateIcon },
-    { id: 'settings', label: 'Settings', icon: CogIcon }
+    { id: 'overview', label: 'Overview', icon: ChartBarIcon, href: '/admin' },
+    { id: 'users', label: 'Users', icon: UsersIcon, href: '/admin/users' },
+    { id: 'auctions', label: 'Auctions', icon: TrophyIcon, href: '/admin/auctions' },
+    { id: 'offers', label: 'Offers', icon: TagIcon, href: '/admin/offers' },
+    { id: 'invoices', label: 'Invoices', icon: DocumentDuplicateIcon, href: '/admin/payments' },
+    { id: 'settings', label: 'Settings', icon: CogIcon, href: '/admin/settings' }
   ];
 
   const quickActions: QuickAction[] = [
@@ -220,6 +310,7 @@ export default function ModernAdminDashboard() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                onClick={() => router.push('/admin/create-auction')}
                 className="bg-gradient-to-r from-green-400 to-emerald-500 text-black px-6 py-2 rounded-xl font-semibold"
               >
                 Create Auction
@@ -242,7 +333,13 @@ export default function ModernAdminDashboard() {
                       key={tab.id}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      onClick={() => setActiveTab(tab.id)}
+                      onClick={() => {
+                        if (tab.id === 'overview') {
+                          setActiveTab(tab.id);
+                        } else {
+                          router.push(tab.href);
+                        }
+                      }}
                       className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
                         activeTab === tab.id
                           ? 'bg-green-400/20 text-green-400 border border-green-400/30'
@@ -341,7 +438,7 @@ export default function ModernAdminDashboard() {
                             key={action.id}
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
-                            onClick={() => window.location.href = action.href}
+                            onClick={() => router.push(action.href)}
                             className="p-4 bg-white/5 rounded-xl border border-white/5 cursor-pointer hover:bg-white/10 transition-all"
                           >
                             <Icon className={`w-8 h-8 mb-3 text-${action.color}-400`} />
