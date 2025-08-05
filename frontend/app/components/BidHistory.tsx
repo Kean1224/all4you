@@ -136,7 +136,7 @@ export default function BidHistory({
                   <div className="flex flex-col">
                     <div className="flex items-center gap-2">
                       <span className={`font-bold text-lg ${isWinningBid ? 'text-yellow-600' : 'text-blue-600'}`}>
-                        R{bid.amount.toLocaleString()}
+                        R{(bid.amount || 0).toLocaleString()}
                       </span>
                       {bid.isAutoBid && (
                         <span className="bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded text-xs font-medium">
@@ -191,10 +191,10 @@ export default function BidHistory({
       <div className="mt-3 pt-3 border-t border-gray-200">
         <div className="flex justify-between items-center text-sm text-gray-600">
           <span>
-            Average bid: R{Math.round(realtimeBids.reduce((sum, bid) => sum + bid.amount, 0) / realtimeBids.length).toLocaleString()}
+            Average bid: R{realtimeBids.length > 0 ? Math.round(realtimeBids.reduce((sum, bid) => sum + (bid.amount || 0), 0) / realtimeBids.length).toLocaleString() : '0'}
           </span>
           <span>
-            Bid range: R{Math.min(...realtimeBids.map(b => b.amount)).toLocaleString()} - R{Math.max(...realtimeBids.map(b => b.amount)).toLocaleString()}
+            Bid range: R{realtimeBids.length > 0 ? Math.min(...realtimeBids.map(b => b.amount || 0)).toLocaleString() : '0'} - R{realtimeBids.length > 0 ? Math.max(...realtimeBids.map(b => b.amount || 0)).toLocaleString() : '0'}
           </span>
         </div>
       </div>

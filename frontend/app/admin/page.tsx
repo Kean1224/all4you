@@ -304,7 +304,7 @@ export default function ModernAdminDashboard() {
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-gray-400 text-sm">Total Revenue</p>
-                          <p className="text-2xl font-bold text-white">${stats.totalRevenue.toLocaleString()}</p>
+                          <p className="text-2xl font-bold text-white">R{(stats.totalRevenue || 0).toLocaleString()}</p>
                         </div>
                         <BanknotesIcon className="w-8 h-8 text-purple-400" />
                       </div>
