@@ -173,7 +173,7 @@ export default function PastAuctionsPage() {
                             return (
                               <div key={lot.id} className="text-xs text-green-700">
                                 <span className="font-semibold">{lot.title}</span>
-                                <span className="ml-2 text-green-600">R{winningBid.amount.toLocaleString()}</span>
+                                <span className="ml-2 text-green-600">R{(winningBid.amount || 0).toLocaleString()}</span>
                               </div>
                             );
                           })}

@@ -192,7 +192,7 @@ export default function LotDetailPage() {
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-gray-700 mb-2">Current Bid</h3>
               <div className="text-3xl font-bold text-blue-600">
-                R{lot.currentBid?.toLocaleString() || 0}
+                R{(lot.currentBid || 0).toLocaleString()}
               </div>
               <div className="text-sm text-gray-500">
                 Next bid: R{((lot.currentBid || 0) + (lot.bidIncrement || 10)).toLocaleString()}
@@ -243,7 +243,7 @@ export default function LotDetailPage() {
                 <p className="text-gray-600 font-semibold">🔚 This lot has ended</p>
                 {lot.bidHistory && lot.bidHistory.length > 0 && (
                   <p className="text-sm text-gray-500 mt-1">
-                    Final bid: R{lot.currentBid?.toLocaleString() || 0}
+                    Final bid: R{(lot.currentBid || 0).toLocaleString()}
                   </p>
                 )}
               </div>

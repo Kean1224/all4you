@@ -244,7 +244,7 @@ export default function AuctionDetailPage() {
                     <div className="flex items-center gap-2 text-yellow-400">
                       <ExclamationTriangleIcon className="w-4 h-4" />
                       <span className="font-medium">Deposit Required:</span>
-                      <span>R{auction.depositAmount.toLocaleString()}</span>
+                      <span>R{(auction.depositAmount || 0).toLocaleString()}</span>
                     </div>
                   )}
                 </div>
@@ -321,7 +321,7 @@ export default function AuctionDetailPage() {
                     <div className="space-y-2 text-gray-300">
                       <p><span className="font-medium">Bid Increment:</span> R{auction.increment}</p>
                       <p><span className="font-medium">Total Lots:</span> {auction.lots.length}</p>
-                      <p><span className="font-medium">Deposit Required:</span> {auction.depositRequired ? `Yes (R${auction.depositAmount.toLocaleString()})` : 'No'}</p>
+                      <p><span className="font-medium">Deposit Required:</span> {auction.depositRequired ? `Yes (R${(auction.depositAmount || 0).toLocaleString()})` : 'No'}</p>
                     </div>
                   </div>
                 </div>
@@ -387,7 +387,7 @@ function LotCard({ lot, auctionId, index }: { lot: Lot; auctionId: string; index
           
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-green-400 font-bold text-lg">R{lot.currentBid.toLocaleString()}</p>
+              <p className="text-green-400 font-bold text-lg">R{(lot.currentBid || 0).toLocaleString()}</p>
               <p className="text-gray-400 text-sm">Current Bid</p>
             </div>
             <div className="text-right">

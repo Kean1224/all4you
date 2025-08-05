@@ -1573,7 +1573,7 @@ export default function AuctionDetailPage() {
                           <p className="text-gray-600 font-semibold">🔚 This lot has ended</p>
                           {lot.bidHistory && lot.bidHistory.length > 0 && (
                             <p className="text-sm text-gray-500 mt-1">
-                              Final bid: R{lot.currentBid.toLocaleString()}
+                              Final bid: R{(lot.currentBid || 0).toLocaleString()}
                             </p>
                           )}
                         </div>
