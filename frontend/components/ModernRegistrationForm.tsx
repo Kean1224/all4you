@@ -132,17 +132,27 @@ export default function ModernRegistrationForm() {
     try {
       const registrationData = new FormData();
       
-      // Add form data
-      Object.entries(formData).forEach(([key, value]) => {
-        registrationData.append(key, value.toString());
-      });
+      // Add form data with correct field names for backend
+      registrationData.append('firstName', formData.firstName);
+      registrationData.append('lastName', formData.lastName);
+      registrationData.append('email', formData.email);
+      registrationData.append('phone', formData.phone);
+      registrationData.append('password', formData.password);
+      registrationData.append('idNumber', formData.idNumber);
+      registrationData.append('address', formData.address);
+      registrationData.append('city', formData.city);
+      registrationData.append('postalCode', formData.postalCode);
+      registrationData.append('termsAccepted', formData.termsAccepted.toString());
+      registrationData.append('privacyAccepted', formData.privacyAccepted.toString());
+      registrationData.append('marketingConsent', formData.marketingConsent.toString());
 
-      // Add files
+      // Add files with correct field names
       if (files.idDocument) registrationData.append('idDocument', files.idDocument);
       if (files.proofOfAddress) registrationData.append('proofOfAddress', files.proofOfAddress);
       if (files.bankStatement) registrationData.append('bankStatement', files.bankStatement);
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/register`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.all4youauctions.co.za';
+      const response = await fetch(`${apiUrl}/api/auth/register`, {
         method: 'POST',
         body: registrationData,
       });
@@ -155,7 +165,7 @@ export default function ModernRegistrationForm() {
           router.push('/verify-email');
         }, 2000);
       } else {
-        setError(data.message || 'Registration failed');
+        setError(data.error || data.message || 'Registration failed');
       }
     } catch (error) {
       setError('Network error. Please try again.');
@@ -454,7 +464,309 @@ export default function ModernRegistrationForm() {
                 </div>
               )}
 
-              {/* Additional steps would continue here... */}
+              {/* Step 3: Address Information */}
+              {step === 3 && (
+                <div className="space-y-6">
+                  <h3 className="text-xl font-sora font-bold text-secondary-800 mb-6">
+                    Address Information
+                  </h3>
+                  
+                  <div>
+                    <label className="block text-sm font-inter font-medium text-secondary-700 mb-2">
+                      ID Number *
+                    </label>
+                    <div className="relative">
+                      <IdentificationIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-secondary-400" />
+                      <input
+                        type="text"
+                        name="idNumber"
+                        value={formData.idNumber}
+                        onChange={handleInputChange}
+                        required
+                        className="w-full pl-10 pr-3 py-3 border border-secondary-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent font-inter text-secondary-800 placeholder-secondary-400 bg-white/80 backdrop-blur-sm"
+                        placeholder="ID number"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-inter font-medium text-secondary-700 mb-2">
+                      Street Address *
+                    </label>
+                    <div className="relative">
+                      <HomeIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-secondary-400" />
+                      <input
+                        type="text"
+                        name="address"
+                        value={formData.address}
+                        onChange={handleInputChange}
+                        required
+                        className="w-full pl-10 pr-3 py-3 border border-secondary-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent font-inter text-secondary-800 placeholder-secondary-400 bg-white/80 backdrop-blur-sm"
+                        placeholder="123 Main Street"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-inter font-medium text-secondary-700 mb-2">
+                        City *
+                      </label>
+                      <input
+                        type="text"
+                        name="city"
+                        value={formData.city}
+                        onChange={handleInputChange}
+                        required
+                        className="w-full px-3 py-3 border border-secondary-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent font-inter text-secondary-800 placeholder-secondary-400 bg-white/80 backdrop-blur-sm"
+                        placeholder="Cape Town"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-inter font-medium text-secondary-700 mb-2">
+                        Postal Code *
+                      </label>
+                      <input
+                        type="text"
+                        name="postalCode"
+                        value={formData.postalCode}
+                        onChange={handleInputChange}
+                        required
+                        className="w-full px-3 py-3 border border-secondary-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent font-inter text-secondary-800 placeholder-secondary-400 bg-white/80 backdrop-blur-sm"
+                        placeholder="8001"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 4: Document Uploads */}
+              {step === 4 && (
+                <div className="space-y-6">
+                  <h3 className="text-xl font-sora font-bold text-secondary-800 mb-6">
+                    FICA Documents
+                  </h3>
+                  <p className="text-sm text-secondary-600 mb-6">
+                    Please upload the required documents for FICA compliance. All documents should be clear and readable.
+                  </p>
+                  
+                  {/* ID Document Upload */}
+                  <div>
+                    <label className="block text-sm font-inter font-medium text-secondary-700 mb-2">
+                      ID Document (Copy of ID or Passport) *
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="file"
+                        id="idDocument"
+                        accept=".jpg,.jpeg,.png,.pdf"
+                        onChange={(e) => handleFileChange(e, 'idDocument')}
+                        className="hidden"
+                      />
+                      <label
+                        htmlFor="idDocument"
+                        className="flex items-center justify-center w-full px-4 py-6 border-2 border-dashed border-secondary-300 rounded-xl cursor-pointer hover:border-primary-400 transition-colors bg-white/60 backdrop-blur-sm"
+                      >
+                        <div className="text-center">
+                          <DocumentArrowUpIcon className="mx-auto h-12 w-12 text-secondary-400" />
+                          <div className="mt-2">
+                            <span className="text-sm font-inter text-secondary-700">
+                              {files.idDocument ? files.idDocument.name : 'Click to upload ID document'}
+                            </span>
+                            <p className="text-xs text-secondary-500 mt-1">JPG, PNG, or PDF (max 10MB)</p>
+                          </div>
+                        </div>
+                      </label>
+                    </div>
+                    {files.idDocument && (
+                      <p className="mt-2 text-sm text-green-600 flex items-center">
+                        <CheckCircleIcon className="w-4 h-4 mr-1" />
+                        {files.idDocument.name}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Proof of Address Upload */}
+                  <div>
+                    <label className="block text-sm font-inter font-medium text-secondary-700 mb-2">
+                      Proof of Address (Utility Bill or Bank Statement) *
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="file"
+                        id="proofOfAddress"
+                        accept=".jpg,.jpeg,.png,.pdf"
+                        onChange={(e) => handleFileChange(e, 'proofOfAddress')}
+                        className="hidden"
+                      />
+                      <label
+                        htmlFor="proofOfAddress"
+                        className="flex items-center justify-center w-full px-4 py-6 border-2 border-dashed border-secondary-300 rounded-xl cursor-pointer hover:border-primary-400 transition-colors bg-white/60 backdrop-blur-sm"
+                      >
+                        <div className="text-center">
+                          <HomeIcon className="mx-auto h-12 w-12 text-secondary-400" />
+                          <div className="mt-2">
+                            <span className="text-sm font-inter text-secondary-700">
+                              {files.proofOfAddress ? files.proofOfAddress.name : 'Click to upload proof of address'}
+                            </span>
+                            <p className="text-xs text-secondary-500 mt-1">Utility bill, bank statement, or municipal account</p>
+                          </div>
+                        </div>
+                      </label>
+                    </div>
+                    {files.proofOfAddress && (
+                      <p className="mt-2 text-sm text-green-600 flex items-center">
+                        <CheckCircleIcon className="w-4 h-4 mr-1" />
+                        {files.proofOfAddress.name}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Bank Statement Upload */}
+                  <div>
+                    <label className="block text-sm font-inter font-medium text-secondary-700 mb-2">
+                      Bank Statement (Last 3 Months) *
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="file"
+                        id="bankStatement"
+                        accept=".jpg,.jpeg,.png,.pdf"
+                        onChange={(e) => handleFileChange(e, 'bankStatement')}
+                        className="hidden"
+                      />
+                      <label
+                        htmlFor="bankStatement"
+                        className="flex items-center justify-center w-full px-4 py-6 border-2 border-dashed border-secondary-300 rounded-xl cursor-pointer hover:border-primary-400 transition-colors bg-white/60 backdrop-blur-sm"
+                      >
+                        <div className="text-center">
+                          <DocumentArrowUpIcon className="mx-auto h-12 w-12 text-secondary-400" />
+                          <div className="mt-2">
+                            <span className="text-sm font-inter text-secondary-700">
+                              {files.bankStatement ? files.bankStatement.name : 'Click to upload bank statement'}
+                            </span>
+                            <p className="text-xs text-secondary-500 mt-1">Recent bank statement (last 3 months)</p>
+                          </div>
+                        </div>
+                      </label>
+                    </div>
+                    {files.bankStatement && (
+                      <p className="mt-2 text-sm text-green-600 flex items-center">
+                        <CheckCircleIcon className="w-4 h-4 mr-1" />
+                        {files.bankStatement.name}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Step 5: Review and Terms */}
+              {step === 5 && (
+                <div className="space-y-6">
+                  <h3 className="text-xl font-sora font-bold text-secondary-800 mb-6">
+                    Review & Terms
+                  </h3>
+                  
+                  {/* Summary */}
+                  <div className="bg-secondary-50 rounded-xl p-6 space-y-4">
+                    <h4 className="font-inter font-semibold text-secondary-800">Registration Summary</h4>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="text-secondary-600">Name:</span>
+                        <p className="font-medium">{formData.firstName} {formData.lastName}</p>
+                      </div>
+                      <div>
+                        <span className="text-secondary-600">Email:</span>
+                        <p className="font-medium">{formData.email}</p>
+                      </div>
+                      <div>
+                        <span className="text-secondary-600">Phone:</span>
+                        <p className="font-medium">{formData.phone}</p>
+                      </div>
+                      <div>
+                        <span className="text-secondary-600">City:</span>
+                        <p className="font-medium">{formData.city}</p>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <span className="text-secondary-600 text-sm">Documents:</span>
+                      <div className="space-y-1">
+                        {files.idDocument && (
+                          <p className="text-sm text-green-600 flex items-center">
+                            <CheckCircleIcon className="w-4 h-4 mr-1" />
+                            ID Document: {files.idDocument.name}
+                          </p>
+                        )}
+                        {files.proofOfAddress && (
+                          <p className="text-sm text-green-600 flex items-center">
+                            <CheckCircleIcon className="w-4 h-4 mr-1" />
+                            Proof of Address: {files.proofOfAddress.name}
+                          </p>
+                        )}
+                        {files.bankStatement && (
+                          <p className="text-sm text-green-600 flex items-center">
+                            <CheckCircleIcon className="w-4 h-4 mr-1" />
+                            Bank Statement: {files.bankStatement.name}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Terms and Conditions */}
+                  <div className="space-y-4">
+                    <div className="flex items-start">
+                      <input
+                        type="checkbox"
+                        id="termsAccepted"
+                        name="termsAccepted"
+                        checked={formData.termsAccepted}
+                        onChange={handleInputChange}
+                        className="mt-1 h-4 w-4 text-primary-600 focus:ring-primary-500 border-secondary-300 rounded"
+                      />
+                      <label htmlFor="termsAccepted" className="ml-3 text-sm text-secondary-700">
+                        I accept the{' '}
+                        <Link href="/terms" className="text-primary-600 hover:text-primary-700 font-medium">
+                          Terms of Service
+                        </Link>{' '}
+                        and understand the auction platform rules. *
+                      </label>
+                    </div>
+
+                    <div className="flex items-start">
+                      <input
+                        type="checkbox"
+                        id="privacyAccepted"
+                        name="privacyAccepted"
+                        checked={formData.privacyAccepted}
+                        onChange={handleInputChange}
+                        className="mt-1 h-4 w-4 text-primary-600 focus:ring-primary-500 border-secondary-300 rounded"
+                      />
+                      <label htmlFor="privacyAccepted" className="ml-3 text-sm text-secondary-700">
+                        I accept the{' '}
+                        <Link href="/privacy" className="text-primary-600 hover:text-primary-700 font-medium">
+                          Privacy Policy
+                        </Link>{' '}
+                        and consent to data processing. *
+                      </label>
+                    </div>
+
+                    <div className="flex items-start">
+                      <input
+                        type="checkbox"
+                        id="marketingConsent"
+                        name="marketingConsent"
+                        checked={formData.marketingConsent}
+                        onChange={handleInputChange}
+                        className="mt-1 h-4 w-4 text-primary-600 focus:ring-primary-500 border-secondary-300 rounded"
+                      />
+                      <label htmlFor="marketingConsent" className="ml-3 text-sm text-secondary-700">
+                        I consent to receive marketing communications and auction notifications.
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              )}
               
               {/* Error Message */}
               {error && (

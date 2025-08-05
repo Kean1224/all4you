@@ -80,18 +80,19 @@ const JWT_EXPIRES_IN = '7d';
 // POST /api/auth/register (now with email verification)
 router.post('/register', uploadFica.fields([
   { name: 'proofOfAddress', maxCount: 1 },
-  { name: 'idCopy', maxCount: 1 }
+  { name: 'idDocument', maxCount: 1 },
+  { name: 'bankStatement', maxCount: 1 }
 ]), async (req, res) => {
   console.log('Register request body:', req.body);
   console.log('Register request files:', req.files);
-  const { email, password, name, username, cell } = req.body;
+  const { email, password, firstName, lastName, phone, cell, idNumber, address, city, postalCode } = req.body;
   
-  if (!email || !password || !name || !username) {
-    return res.status(400).json({ error: 'Email, password, name, and username required.' });
-  }
+  // Create name from firstName and lastName, fallback to name field
+  const name = firstName && lastName ? `${firstName} ${lastName}` : req.body.name;
+  const username = req.body.username || email.split('@')[0]; // Generate username from email if not provided
   
-  if (!/^[a-zA-Z0-9]+$/.test(username)) {
-    return res.status(400).json({ error: 'Username must contain only letters and numbers.' });
+  if (!email || !password || !name) {
+    return res.status(400).json({ error: 'Email, password, and name required.' });
   }
   
   // Check if email is already registered
@@ -112,7 +113,8 @@ router.post('/register', uploadFica.fields([
     
     // Handle FICA files
     const proofOfAddress = req.files && req.files['proofOfAddress'] ? req.files['proofOfAddress'][0].filename : null;
-    const idCopy = req.files && req.files['idCopy'] ? req.files['idCopy'][0].filename : null;
+    const idDocument = req.files && req.files['idDocument'] ? req.files['idDocument'][0].filename : null;
+    const bankStatement = req.files && req.files['bankStatement'] ? req.files['bankStatement'][0].filename : null;
     
     // Create pending user data
     const pendingUserData = {
@@ -120,9 +122,14 @@ router.post('/register', uploadFica.fields([
       password: hashed,
       name,
       username,
-      cell: cell || '',
-      idDocument: idCopy,
-      proofOfAddress: proofOfAddress
+      cell: phone || cell || '',
+      idNumber: idNumber || '',
+      address: address || '',
+      city: city || '',
+      postalCode: postalCode || '',
+      idDocument: idDocument,
+      proofOfAddress: proofOfAddress,
+      bankStatement: bankStatement
     };
     
     // Save pending user and get verification token
