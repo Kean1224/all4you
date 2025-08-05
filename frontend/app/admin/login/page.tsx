@@ -61,7 +61,7 @@ function LoginForm() {
         console.log('Admin login successful, token and timestamp stored');
         
         // Redirect to the intended page or dashboard
-        const redirectTo = searchParams.get('redirect') || '/admin/dashboard';
+        const redirectTo = searchParams.get('redirect') || '/admin';
         router.push(redirectTo);
       } else {
         setError(data.error || 'Invalid credentials');

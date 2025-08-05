@@ -78,7 +78,7 @@ export default function ModernAdminDashboard() {
     try {
       setLoading(true);
       
-      const token = localStorage.getItem('adminToken');
+      const token = localStorage.getItem('admin_jwt');
       const headers = {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
