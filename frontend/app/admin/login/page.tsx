@@ -62,7 +62,8 @@ function LoginForm() {
         
         // Redirect to the intended page or dashboard
         const redirectTo = searchParams.get('redirect') || '/admin';
-        router.push(redirectTo);
+        console.log('Redirecting to', redirectTo);
+        setTimeout(() => router.push(redirectTo), 100);
       } else {
         setError(data.error || 'Invalid credentials');
       }
