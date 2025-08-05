@@ -17,51 +17,53 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check for logged-in user from localStorage
-    const storedEmail = localStorage.getItem('userEmail');
-    const storedToken = localStorage.getItem('token');
-    
-    if (storedEmail) {
-      setIsLoggedIn(true);
-      setUserEmail(storedEmail);
-      // Extract name from email (part before @)
-      setUserName(storedEmail.split('@')[0]);
-    }
+    // Check for logged-in user from localStorage (client-side only)
+    if (typeof window !== 'undefined') {
+      const storedEmail = localStorage.getItem('userEmail');
+      const storedToken = localStorage.getItem('token');
+      
+      if (storedEmail) {
+        setIsLoggedIn(true);
+        setUserEmail(storedEmail);
+        // Extract name from email (part before @)
+        setUserName(storedEmail.split('@')[0]);
+      }
 
-    // Verify with session API
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json'
-    };
-    
-    if (storedToken) {
-      headers['Authorization'] = `Bearer ${storedToken}`;
-    }
+      // Verify with session API
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json'
+      };
+      
+      if (storedToken) {
+        headers['Authorization'] = `Bearer ${storedToken}`;
+      }
 
-    // Fetch session data
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/session`, { 
-      headers,
-      credentials: 'include' 
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.email) {
-          setIsLoggedIn(true);
-          setUserEmail(data.email);
-          setUserName(data.email.split('@')[0]);
-        } else if (!storedEmail) {
-          setIsLoggedIn(false);
-          setUserEmail('');
-          setUserName('');
-        }
+      // Fetch session data
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/session`, { 
+        headers,
+        credentials: 'include' 
       })
-      .catch(() => {
-        // If session check fails but we have stored email, assume logged in
-        if (storedEmail) {
-          setIsLoggedIn(true);
-          setUserEmail(storedEmail);
-          setUserName(storedEmail.split('@')[0]);
-        }
-      });
+        .then(res => res.json())
+        .then(data => {
+          if (data.email) {
+            setIsLoggedIn(true);
+            setUserEmail(data.email);
+            setUserName(data.email.split('@')[0]);
+          } else if (!storedEmail) {
+            setIsLoggedIn(false);
+            setUserEmail('');
+            setUserName('');
+          }
+        })
+        .catch(() => {
+          // If session check fails but we have stored email, assume logged in
+          if (storedEmail) {
+            setIsLoggedIn(true);
+            setUserEmail(storedEmail);
+            setUserName(storedEmail.split('@')[0]);
+          }
+        });
+    }
 
     // Fetch featured auctions
     fetchFeaturedAuctions();

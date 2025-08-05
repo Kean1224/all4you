@@ -184,7 +184,9 @@ export default function RegisterPage() {
       } else {
         setStatus('✅ Account created successfully!');
         setTimeout(() => {
-          window.location.href = '/login';
+          if (typeof window !== 'undefined') {
+            window.location.href = '/login';
+          }
         }, 2000);
       }
       

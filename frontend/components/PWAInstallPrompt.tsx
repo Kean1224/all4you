@@ -26,39 +26,42 @@ export const PWAInstallPrompt: React.FC = () => {
   const [isStandalone, setIsStandalone] = useState(false);
 
   useEffect(() => {
-    // Check if app is already installed
-    setIsStandalone(window.matchMedia('(display-mode: standalone)').matches);
-    
-    // Check if iOS
-    setIsIOS(/iPad|iPhone|iPod/.test(navigator.userAgent));
-
-    // Listen for the beforeinstallprompt event
-    const handleBeforeInstallPrompt = (e: Event) => {
-      e.preventDefault();
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
+    // Only run on client-side
+    if (typeof window !== 'undefined') {
+      // Check if app is already installed
+      setIsStandalone(window.matchMedia('(display-mode: standalone)').matches);
       
-      // Show prompt after a delay if not already installed
-      setTimeout(() => {
-        if (!isStandalone) {
-          setShowPrompt(true);
-        }
-      }, 3000);
-    };
+      // Check if iOS
+      setIsIOS(/iPad|iPhone|iPod/.test(navigator.userAgent));
 
-    // Listen for app installed event
-    const handleAppInstalled = () => {
-      setIsInstalled(true);
-      setShowPrompt(false);
-      setDeferredPrompt(null);
-    };
+      // Listen for the beforeinstallprompt event
+      const handleBeforeInstallPrompt = (e: Event) => {
+        e.preventDefault();
+        setDeferredPrompt(e as BeforeInstallPromptEvent);
+        
+        // Show prompt after a delay if not already installed
+        setTimeout(() => {
+          if (!isStandalone) {
+            setShowPrompt(true);
+          }
+        }, 3000);
+      };
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    window.addEventListener('appinstalled', handleAppInstalled);
+      // Listen for app installed event
+      const handleAppInstalled = () => {
+        setIsInstalled(true);
+        setShowPrompt(false);
+        setDeferredPrompt(null);
+      };
 
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      window.removeEventListener('appinstalled', handleAppInstalled);
-    };
+      window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.addEventListener('appinstalled', handleAppInstalled);
+
+      return () => {
+        window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+        window.removeEventListener('appinstalled', handleAppInstalled);
+      };
+    }
   }, [isStandalone]);
 
   const handleInstallClick = async () => {
@@ -196,41 +199,44 @@ export const usePWA = () => {
   const [updateAvailable, setUpdateAvailable] = useState(false);
 
   useEffect(() => {
-    // Check installation status
-    setIsInstalled(window.matchMedia('(display-mode: standalone)').matches);
+    // Only run on client-side
+    if (typeof window !== 'undefined') {
+      // Check installation status
+      setIsInstalled(window.matchMedia('(display-mode: standalone)').matches);
 
-    // Monitor online status
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
-    
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-    setIsOnline(navigator.onLine);
+      // Monitor online status
+      const handleOnline = () => setIsOnline(true);
+      const handleOffline = () => setIsOnline(false);
+      
+      window.addEventListener('online', handleOnline);
+      window.addEventListener('offline', handleOffline);
+      setIsOnline(navigator.onLine);
 
-    // Register service worker
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js')
-        .then((registration) => {
-          console.log('SW registered:', registration);
-          
-          // Check for updates
-          registration.addEventListener('updatefound', () => {
-            setUpdateAvailable(true);
+      // Register service worker
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js')
+          .then((registration) => {
+            console.log('SW registered:', registration);
+            
+            // Check for updates
+            registration.addEventListener('updatefound', () => {
+              setUpdateAvailable(true);
+            });
+          })
+          .catch((error) => {
+            console.log('SW registration failed:', error);
           });
-        })
-        .catch((error) => {
-          console.log('SW registration failed:', error);
-        });
-    }
+      }
 
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
+      return () => {
+        window.removeEventListener('online', handleOnline);
+        window.removeEventListener('offline', handleOffline);
+      };
+    }
   }, []);
 
   const updateApp = () => {
-    if ('serviceWorker' in navigator) {
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
       navigator.serviceWorker.ready.then((registration) => {
         if (registration.waiting) {
           registration.waiting.postMessage({ type: 'SKIP_WAITING' });
