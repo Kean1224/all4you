@@ -132,24 +132,7 @@ export default function HeroSection({
             and sellers reach thousands of motivated bidders.
           </motion.p>
 
-          {/* Statistics */}
-          <motion.div
-            variants={itemVariants}
-            className="flex flex-wrap justify-center lg:justify-start gap-8 mb-10"
-          >
-            <div className="text-center">
-              <div className="text-2xl sm:text-3xl font-bold text-primary-500 font-sora">50K+</div>
-              <div className="text-sm text-gray-400 font-inter">Active Bidders</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl sm:text-3xl font-bold text-primary-500 font-sora">10K+</div>
-              <div className="text-sm text-gray-400 font-inter">Items Sold</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl sm:text-3xl font-bold text-primary-500 font-sora">R2M+</div>
-              <div className="text-sm text-gray-400 font-inter">Total Sales</div>
-            </div>
-          </motion.div>
+          {/* Statistics section removed */}
 
           {/* CTA Buttons */}
           <motion.div
