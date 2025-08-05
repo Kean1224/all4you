@@ -1,0 +1,8 @@
+# Force redeploy with updated environment variables
+# Deploy timestamp: 2025-08-05 10:20 UTC
+# Environment: Production with custom domains
+# Backend: https://api.all4youauctions.co.za  
+# Frontend: https://all4youauctions.co.za (and www variant)
+# Issue: CORS error with old Render backend URL
+# Fix: Updated environment variables, force rebuild needed
+DEPLOYMENT_TRIGGER=cors-fix-custom-domains-20250805
