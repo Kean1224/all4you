@@ -24,8 +24,6 @@ export const metadata: Metadata = {
   description: "Buy, Sell, Win on South Africa's trusted online auction platform. Real-time bidding, secure transactions, and verified sellers.",
   keywords: ["auction", "south africa", "bidding", "online auction", "buy", "sell"],
   authors: [{ name: "ALL4YOU Auctioneers" }],
-  viewport: "width=device-width, initial-scale=1, maximum-scale=1",
-  themeColor: "#39FF14",
   manifest: "/manifest.json",
   openGraph: {
     title: "ALL4YOU Auctioneers",
@@ -38,6 +36,13 @@ export const metadata: Metadata = {
     statusBarStyle: "black-translucent",
     title: "ALL4YOU Auctions",
   },
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  themeColor: "#39FF14",
 };
 
 export default function RootLayout({
