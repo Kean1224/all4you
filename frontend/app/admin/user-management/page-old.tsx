@@ -253,48 +253,48 @@ export default function AdminUserManagementPage() {
                       </div>
                     )}
 
-                    {/* Proof of Address */}
-                    {selectedUser.proofOfAddress && (
+                    {/* ID Document */}
+                    {selectedUser.documents?.idDocument && (
                       <div>
-                        <h3 className="text-lg font-medium text-gray-900 mb-3">Proof of Address</h3>
+                        <h3 className="text-lg font-medium text-gray-900 mb-3">ID Document</h3>
                         <div className="border rounded-lg p-4">
                           <img
-                            src={`${process.env.NEXT_PUBLIC_API_URL}/uploads/fica/${selectedUser.proofOfAddress}`}
-                            alt="Proof of Address"
+                            src={`${process.env.NEXT_PUBLIC_API_URL}/uploads/fica/${selectedUser.documents.idDocument}`}
+                            alt="ID Document"
                             className="max-w-full h-auto rounded-lg"
                             onError={(e) => {
                               const target = e.target as HTMLImageElement;
                               target.style.display = 'none';
-                              target.nextElementSibling!.classList.remove('hidden');
                             }}
                           />
                           <div className="hidden text-center py-8 text-gray-500">
-                            <p>📄 {selectedUser.proofOfAddress}</p>
+                            <p>📄 {selectedUser.documents.idDocument}</p>
                             <p className="text-sm">Click to download if image fails to load</p>
                           </div>
                         </div>
                       </div>
                     )}
-
-                    <div className="flex space-x-3">
-                      <button
-                        onClick={() => setViewingDocs(false)}
-                        className="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded-lg transition-colors"
-                      >
-                        Back to Details
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-6">
-                    {/* User Information */}
-                    <div className="grid grid-cols-2 gap-4">
+                    {/* Proof of Address */}
+                    {selectedUser.documents?.proofOfAddress && (
                       <div>
-                        <label className="block text-sm font-medium text-gray-700">Name</label>
-                        <div className="text-sm text-gray-900">{selectedUser.name}</div>
+                        <h3 className="text-lg font-medium text-gray-900 mb-3">Proof of Address</h3>
+                        <div className="border rounded-lg p-4">
+                          <img
+                            src={`${process.env.NEXT_PUBLIC_API_URL}/uploads/fica/${selectedUser.documents.proofOfAddress}`}
+                            alt="Proof of Address"
+                            className="max-w-full h-auto rounded-lg"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = 'none';
+                            }}
+                          />
+                          <div className="hidden text-center py-8 text-gray-500">
+                            <p>📄 {selectedUser.documents.proofOfAddress}</p>
+                            <p className="text-sm">Click to download if image fails to load</p>
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Email</label>
+                    )}
                         <div className="text-sm text-gray-900">{selectedUser.email}</div>
                       </div>
                       <div>
