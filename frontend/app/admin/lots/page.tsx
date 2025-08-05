@@ -1,10 +1,9 @@
 'use client';
 
-
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import AdminSidebar from '../../../components/AdminSidebar';
 
-// ...existing code...
 type Lot = {
   id: string;
   title: string;
@@ -34,6 +33,7 @@ type Auction = {
 };
 
 export default function AdminLotsPage() {
+  const router = useRouter();
   const [auctions, setAuctions] = useState<Auction[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [selectedAuctionId, setSelectedAuctionId] = useState('');
@@ -49,17 +49,46 @@ export default function AdminLotsPage() {
     condition: 'Good',
   });
 
+  // Helper to get admin auth headers
+  const getAdminHeaders = () => {
+    const token = localStorage.getItem('admin_jwt');
+    return {
+      'Content-Type': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` })
+    };
+  };
+
   useEffect(() => {
+    // Check authentication first
+    const token = localStorage.getItem('admin_jwt');
+    if (!token) {
+      router.push('/admin/login');
+      return;
+    }
+    
+    // Verify token client-side
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      if (payload.role !== 'admin' || !payload.email || !payload.exp || Date.now() / 1000 > payload.exp) {
+        router.push('/admin/login');
+        return;
+      }
+    } catch {
+      router.push('/admin/login');
+      return;
+    }
+
     fetchAuctions();
     fetchUsers();
-  }, []);
+  }, [router]);
 
   const fetchAuctions = async () => {
     try {
       // Fetch all auctions (both active and completed for admin view)
+      const headers = getAdminHeaders();
       const [activeResponse, pastResponse] = await Promise.all([
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auctions`),
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auctions/past`)
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auctions`, { headers }),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auctions/past`, { headers })
       ]);
       
       let allAuctions: Auction[] = [];
@@ -69,6 +98,9 @@ export default function AdminLotsPage() {
         if (Array.isArray(activeAuctions)) {
           allAuctions = [...allAuctions, ...activeAuctions];
         }
+      } else if (activeResponse.status === 401) {
+        router.push('/admin/login');
+        return;
       }
       
       if (pastResponse.ok) {
@@ -76,6 +108,9 @@ export default function AdminLotsPage() {
         if (Array.isArray(pastAuctions)) {
           allAuctions = [...allAuctions, ...pastAuctions];
         }
+      } else if (pastResponse.status === 401) {
+        router.push('/admin/login');
+        return;
       }
       
       // Sort by creation date (newest first)
@@ -94,8 +129,14 @@ export default function AdminLotsPage() {
 
   const fetchUsers = async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users`, {
+        headers: getAdminHeaders()
+      });
       if (!res.ok) {
+        if (res.status === 401) {
+          router.push('/admin/login');
+          return;
+        }
         throw new Error(`Failed to fetch users: ${res.status}`);
       }
       const data = await res.json();
@@ -148,10 +189,17 @@ export default function AdminLotsPage() {
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/lots/${selectedAuctionId}`, {
         method: 'POST',
+        headers: {
+          ...(localStorage.getItem('admin_jwt') && { 'Authorization': `Bearer ${localStorage.getItem('admin_jwt')}` })
+        },
         body: formData
       });
 
       if (!response.ok) {
+        if (response.status === 401) {
+          router.push('/admin/login');
+          return;
+        }
         const errorData = await response.json();
         alert(`Failed to create lot: ${errorData.error || 'Unknown error'}`);
         return;
@@ -187,8 +235,28 @@ export default function AdminLotsPage() {
   const handleDelete = async (auctionId: string, lotId: string, lotNumber?: number, auctionTitle?: string) => {
     const message = `Are you sure you want to delete Lot${lotNumber ? ' ' + lotNumber : ''} from Auction${auctionTitle ? ' \'' + auctionTitle + '\'' : ''}?`;
     if (!confirm(message)) return;
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/lots/${auctionId}/${lotId}`, { method: 'DELETE' });
-    fetchAuctions();
+    
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/lots/${auctionId}/${lotId}`, { 
+        method: 'DELETE',
+        headers: getAdminHeaders()
+      });
+      
+      if (response.status === 401) {
+        router.push('/admin/login');
+        return;
+      }
+      
+      if (!response.ok) {
+        alert('Failed to delete lot');
+        return;
+      }
+      
+      fetchAuctions();
+    } catch (error) {
+      console.error('Error deleting lot:', error);
+      alert('Network error occurred while deleting lot');
+    }
   };
 
   return (
