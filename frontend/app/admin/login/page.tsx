@@ -59,11 +59,9 @@ function LoginForm() {
           localStorage.setItem('admin_login_time', Date.now().toString());
         }
         console.log('Admin login successful, token and timestamp stored');
-        
-        // Redirect to the intended page or dashboard
-        const redirectTo = searchParams.get('redirect') || '/admin';
-        console.log('Redirecting to', redirectTo);
-        setTimeout(() => router.push(redirectTo), 100);
+        // Always redirect to /admin/dashboard after login
+        console.log('Redirecting to /admin/dashboard');
+        setTimeout(() => router.push('/admin/dashboard'), 100);
       } else {
         setError(data.error || 'Invalid credentials');
       }
