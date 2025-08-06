@@ -191,7 +191,6 @@ export default function ModernSellPage() {
     'Home & Garden',
     'Fashion & Accessories',
     'Art & Collectibles',
-    'Sports & Recreation',
     'Books & Media',
     'Business & Industrial',
     'Other'
