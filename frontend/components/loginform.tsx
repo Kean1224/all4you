@@ -42,8 +42,15 @@ export default function LoginForm() {
           localStorage.setItem('userEmail', data.email);
           localStorage.setItem('userRole', data.role);
           console.log('Login successful, token stored:', data.token);
+
+          // Set admin_jwt cookie for admin users so middleware can validate
+          if (data.role === 'admin') {
+            // Set cookie to expire in 2 hours (same as backend token)
+            const expires = new Date(Date.now() + 2 * 60 * 60 * 1000).toUTCString();
+            document.cookie = `admin_jwt=${data.token}; expires=${expires}; path=/; SameSite=Lax`;
+          }
         }
-        
+
         // Redirect based on role
         if (data.role === 'admin') {
           router.push('/admin');
