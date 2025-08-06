@@ -17,6 +17,8 @@ const {
 } = require('./middleware/security');
 
 const app = express();
+// Trust the first proxy (needed for correct IP detection behind Render, Heroku, etc.)
+app.set('trust proxy', 1);
 const depositsRouter = require('./api/deposits/index');
 const PORT = process.env.PORT || 5000;
 
