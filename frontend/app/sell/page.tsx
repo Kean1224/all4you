@@ -135,12 +135,18 @@ export default function ModernSellPage() {
       return;
     }
 
+    // Check for user token before submitting
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setError('You must be logged in to submit an item. Please login or register first.');
+      return;
+    }
+
     setLoading(true);
     setError('');
 
     try {
       const submissionData = new FormData();
-      
       // Add form data
       Object.entries(formData).forEach(([key, value]) => {
         if (typeof value === 'object' && value !== null) {
@@ -151,22 +157,21 @@ export default function ModernSellPage() {
           submissionData.append(key, value.toString());
         }
       });
-
       // Add images
       images.forEach((image) => {
         submissionData.append('images', image.file);
       });
-
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sell-item/submit`, {
         method: 'POST',
         body: submissionData,
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         }
       });
-
       if (response.ok) {
         setSuccess(true);
+      } else if (response.status === 403) {
+        setError('You must be logged in to submit an item. Please login or register first.');
       } else {
         const data = await response.json();
         setError(data.message || 'Failed to submit item. Please try again.');
