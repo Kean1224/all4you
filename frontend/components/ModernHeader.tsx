@@ -102,36 +102,6 @@ export default function ModernHeader({
 
           {/* Desktop Actions */}
           <div className="hidden lg:flex items-center space-x-4">
-            
-            {/* Search */}
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="p-2 text-white hover:text-primary-500 transition-colors duration-200 relative group"
-            >
-              <MagnifyingGlassIcon className="w-6 h-6" />
-              <span className="absolute inset-0 rounded-full bg-primary-500/20 scale-0 group-hover:scale-100 transition-transform duration-200" />
-            </motion.button>
-
-            {/* Notifications */}
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="p-2 text-white hover:text-primary-500 transition-colors duration-200 relative group"
-            >
-              <BellIcon className="w-6 h-6" />
-              {notificationCount > 0 && (
-                <motion.span
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  className="absolute -top-1 -right-1 bg-error text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold"
-                >
-                  {notificationCount > 9 ? '9+' : notificationCount}
-                </motion.span>
-              )}
-              <span className="absolute inset-0 rounded-full bg-primary-500/20 scale-0 group-hover:scale-100 transition-transform duration-200" />
-            </motion.button>
-
             {/* User Account */}
             {isLoggedIn ? (
               <div className="relative group">
