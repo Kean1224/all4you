@@ -16,25 +16,29 @@ export default function LoginForm() {
     console.log('Login attempt:', { email, apiUrl: process.env.NEXT_PUBLIC_API_URL });
     
     try {
-      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`;
+      // Use admin-login endpoint for admin email, else normal login
+      const isAdmin = email === 'admin@admin.com' || email === 'Keanmartin75@gmail.com' || email === 'admin@all4youauctions.co.za';
+      const apiUrl = isAdmin
+        ? `${process.env.NEXT_PUBLIC_API_URL}/api/auth/admin-login`
+        : `${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`;
       console.log('Making request to:', apiUrl);
-      
+
       const res = await fetch(apiUrl, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
         },
         credentials: 'include',
         body: JSON.stringify({ email, password })
       });
-      
+
       console.log('Response status:', res.status);
       console.log('Response headers:', Object.fromEntries(res.headers.entries()));
-      
+
       const data = await res.json();
       console.log('Response data:', data);
       setLoading(false);
-      
+
       if (res.ok) {
         // Store the token in localStorage
         if (data.token) {
