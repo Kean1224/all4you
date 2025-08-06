@@ -34,11 +34,10 @@ export default function CreateAuctionPage() {
   const [isCreating, setIsCreating] = useState(false);
 
   // Helper to get admin auth headers
+  // For testing: do not send Authorization header
   const getAdminHeaders = () => {
-    const token = localStorage.getItem('admin_jwt');
     return {
       'Content-Type': 'application/json',
-      ...(token && { 'Authorization': `Bearer ${token}` })
     };
   };
 
