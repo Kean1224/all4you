@@ -153,8 +153,8 @@ export default function ModernSellPage() {
       });
 
       // Add images
-      images.forEach((image, index) => {
-        submissionData.append(`image_${index}`, image.file);
+      images.forEach((image) => {
+        submissionData.append('images', image.file);
       });
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sell-item/submit`, {
