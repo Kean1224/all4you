@@ -17,22 +17,27 @@ export default function ContactPage() {
     setStatus('');
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Create mailto link for admin email
-    const subject = `Contact Form: Message from ${formData.name}`;
-    const body = `Name: ${formData.name}\nEmail: ${formData.email}\n\nMessage:\n${formData.message}`;
-    const mailtoLink = `mailto:admin@all4youauctions.co.za?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    
-    // Open email client
-    window.location.href = mailtoLink;
-
-    // Simulate successful form submission
-    setTimeout(() => {
-      setStatus('✅ Email client opened! Your message is ready to send.');
-      setFormData({ name: '', email: '', message: '' });
-    }, 1000);
+    setStatus('');
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setStatus('✅ Message sent! We will get back to you soon.');
+        setFormData({ name: '', email: '', message: '' });
+      } else {
+        setStatus('❌ Failed to send message. Please try again later.');
+      }
+    } catch (err) {
+      setStatus('❌ Network error. Please try again later.');
+    }
   };
 
   return (
