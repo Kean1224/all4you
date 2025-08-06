@@ -61,7 +61,23 @@
     "startTime": "2025-07-23T22:59",
     "endTime": "2025-07-26T22:59",
     "increment": 50,
-    "lots": [],
+    "lots": [
+      {
+        "id": "lot-demo-1",
+        "title": "Modern Art Painting",
+        "description": "A vibrant modern art piece, perfect for contemporary spaces.",
+        "imageUrl": "/logo.png",
+        "currentBid": 500,
+        "status": "open",
+        "bidHistory": [
+          { "bidderEmail": "user1@example.com", "amount": 300, "time": "2025-08-01T10:00:00.000Z" },
+          { "bidderEmail": "user2@example.com", "amount": 400, "time": "2025-08-02T12:00:00.000Z" },
+          { "bidderEmail": "user3@example.com", "amount": 500, "time": "2025-08-03T14:00:00.000Z" }
+        ],
+        "bidIncrement": 50,
+        "endTime": "2025-08-10T18:00:00.000Z"
+      }
+    ],
     "depositRequired": false,
     "depositAmount": 0,
     "createdAt": "2025-07-22T20:59:14.335Z"
