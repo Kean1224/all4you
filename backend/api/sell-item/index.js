@@ -84,20 +84,22 @@ router.post('/submit', upload.array('images', 5), authenticateToken, async (req,
       itemDescription,
       category,
       condition,
-      estimatedValue,
-      minReserve,
+      askingPrice,
+      shippingOptions,
+      location,
+      itemWeight,
+      dimensions,
       notes
     } = req.body;
 
     // Validation
-    if (!itemTitle || !itemDescription || !category) {
+    if (!itemTitle || !itemDescription || !category || !askingPrice) {
       return res.status(400).json({ 
-        error: 'Missing required fields: itemTitle, itemDescription, category' 
+        error: 'Missing required fields: itemTitle, itemDescription, category, askingPrice' 
       });
     }
 
     const userEmail = req.user.email;
-    const userIsAdmin = req.user.isAdmin;
 
     // Process uploaded images
     const uploadedImages = req.files ? req.files.map(file => ({
@@ -116,18 +118,19 @@ router.post('/submit', upload.array('images', 5), authenticateToken, async (req,
       itemDescription: itemDescription.trim(),
       category: category.trim(),
       condition: condition || 'Good',
-      estimatedValue: parseFloat(estimatedValue) || 0,
-      minReserve: parseFloat(minReserve) || 0,
+      askingPrice: parseFloat(askingPrice) || 0,
+      shippingOptions: shippingOptions ? JSON.parse(shippingOptions) : [],
+      location: location || '',
+      itemWeight: itemWeight || '',
+      dimensions: dimensions ? JSON.parse(dimensions) : { length: '', width: '', height: '' },
       notes: notes ? notes.trim() : '',
       images: uploadedImages,
-      status: 'pending', // pending, approved, rejected, in_auction, sold
+      status: 'pending', // pending, approved, rejected, countered, accepted, sold
       submittedAt: new Date().toISOString(),
       reviewedAt: null,
       reviewedBy: null,
       adminNotes: '',
-      adminEstimate: null,
-      suggestedReserve: null,
-      auctionId: null,
+      adminOffer: null, // for counter-offer
       finalSalePrice: null
     };
 
@@ -138,95 +141,84 @@ router.post('/submit', upload.array('images', 5), authenticateToken, async (req,
     try {
       await sendMail({
         to: userEmail,
-        subject: `Item Submission Received - ${itemTitle}`,
+        subject: `Offer Submitted - ${itemTitle}`,
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #059669;">📦 Item Submission Received</h2>
-            <p>Thank you for submitting your item to ALL4YOU AUCTIONEERS!</p>
-            
+            <h2 style="color: #059669;">📦 Offer Submitted</h2>
+            <p>Thank you for submitting your offer to sell your item directly to the admin!</p>
             <div style="background: #f0fdf4; padding: 15px; border-radius: 8px; margin: 15px 0;">
               <h3>Item Details:</h3>
               <p><strong>Title:</strong> ${itemTitle}</p>
               <p><strong>Category:</strong> ${category}</p>
               <p><strong>Condition:</strong> ${condition}</p>
-              <p><strong>Estimated Value:</strong> R${estimatedValue || 'Not specified'}</p>
+              <p><strong>Your Asking Price:</strong> R${askingPrice}</p>
               <p><strong>Images Uploaded:</strong> ${uploadedImages.length}</p>
               <p><strong>Submission ID:</strong> ${newItem.id}</p>
             </div>
-            
             <div style="background: #fefce8; padding: 15px; border-radius: 8px; margin: 15px 0;">
               <h4 style="color: #a16207;">Next Steps:</h4>
               <p style="color: #a16207;">
-                • Our expert team will review your item within 2-3 business days<br>
-                • We'll provide a professional valuation and reserve recommendation<br>
-                • You'll receive an email with our assessment and next steps<br>
-                • If accepted, your item will be included in our next suitable auction
+                • The admin will review your offer within 2-3 business days<br>
+                • You will receive an email if your offer is accepted or if a counter-offer is made<br>
+                • If accepted, you will be contacted to arrange the sale
               </p>
             </div>
-            
-            <p>You can track your submission status in your seller dashboard.</p>
-            
+            <p>You can track your offer status in your dashboard.</p>
             <p>Best regards,<br><strong>ALL4YOU AUCTIONEERS Team</strong></p>
           </div>
         `,
         text: `
-Item Submission Received - ${itemTitle}
+Offer Submitted - ${itemTitle}
 
-Thank you for submitting your item to ALL4YOU AUCTIONEERS!
+Thank you for submitting your offer to sell your item directly to the admin!
 
 Item: ${itemTitle}
 Category: ${category}
 Condition: ${condition}
-Estimated Value: R${estimatedValue || 'Not specified'}
+Your Asking Price: R${askingPrice}
 Images: ${uploadedImages.length}
 ID: ${newItem.id}
 
-Our team will review your item within 2-3 business days.
+The admin will review your offer within 2-3 business days.
 
 - ALL4YOU AUCTIONEERS Team
         `
       });
     } catch (emailError) {
-      console.error('Failed to send item submission email:', emailError);
+      console.error('Failed to send offer submission email:', emailError);
     }
 
     // Send notification to admin
     try {
       await sendMail({
         to: 'admin@all4youauctions.co.za',
-        subject: `New Item Submission - ${itemTitle}`,
+        subject: `New Direct Sale Offer - ${itemTitle}`,
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #dc2626;">🔔 New Item Submission</h2>
-            <p>A new item has been submitted for auction consideration.</p>
-            
+            <h2 style="color: #dc2626;">🔔 New Direct Sale Offer</h2>
+            <p>A new direct sale offer has been submitted.</p>
             <div style="background: #fef2f2; padding: 15px; border-radius: 8px; margin: 15px 0;">
               <h3>Item Details:</h3>
               <p><strong>Submitted by:</strong> ${userEmail}</p>
               <p><strong>Title:</strong> ${itemTitle}</p>
               <p><strong>Category:</strong> ${category}</p>
               <p><strong>Condition:</strong> ${condition}</p>
-              <p><strong>Est. Value:</strong> R${estimatedValue || 'Not specified'}</p>
-              <p><strong>Min Reserve:</strong> R${minReserve || 'Not specified'}</p>
+              <p><strong>Asking Price:</strong> R${askingPrice}</p>
               <p><strong>Images:</strong> ${uploadedImages.length}</p>
               <p><strong>ID:</strong> ${newItem.id}</p>
             </div>
-            
             <div style="background: #fffbeb; padding: 15px; border-radius: 8px; margin: 15px 0;">
               <h4>Description:</h4>
               <p>${itemDescription}</p>
               ${notes ? `<h4>Additional Notes:</h4><p>${notes}</p>` : ''}
             </div>
-            
             <div style="text-align: center; margin: 20px 0;">
               <a href="${process.env.FRONTEND_URL}/admin/sell-items" 
                  style="background: #dc2626; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;">
-                📋 Review Item Submission
+                📋 Review Offer
               </a>
             </div>
-            
             <p>Please review and respond within 2-3 business days.</p>
-            
             <p>Best regards,<br><strong>System Notification</strong></p>
           </div>
         `
@@ -236,7 +228,7 @@ Our team will review your item within 2-3 business days.
     }
 
     res.json({ 
-      message: 'Item submitted successfully', 
+      message: 'Offer submitted successfully', 
       item: {
         id: newItem.id,
         itemTitle: newItem.itemTitle,
@@ -248,7 +240,7 @@ Our team will review your item within 2-3 business days.
 
   } catch (error) {
     console.error('Error submitting sell item:', error);
-    res.status(500).json({ error: 'Failed to submit item' });
+    res.status(500).json({ error: 'Failed to submit offer' });
   }
 });
 

@@ -21,9 +21,7 @@ interface SellItemForm {
   description: string;
   category: string;
   condition: string;
-  startingPrice: string;
-  reservePrice: string;
-  auctionDuration: string;
+  askingPrice: string;
   shippingOptions: string[];
   location: string;
   itemWeight: string;
@@ -52,9 +50,7 @@ export default function ModernSellPage() {
     description: '',
     category: '',
     condition: '',
-    startingPrice: '',
-    reservePrice: '',
-    auctionDuration: '7',
+    askingPrice: '',
     shippingOptions: [],
     location: '',
     itemWeight: '',
@@ -124,7 +120,7 @@ export default function ModernSellPage() {
       case 2:
         return !!(formData.title && formData.description && formData.category && formData.condition);
       case 3:
-        return !!(formData.startingPrice && formData.auctionDuration);
+        return !!(formData.askingPrice);
       default:
         return false;
     }
@@ -197,7 +193,7 @@ export default function ModernSellPage() {
   const steps = [
     { number: 1, title: 'Photos', icon: PhotoIcon },
     { number: 2, title: 'Details', icon: DocumentCheckIcon },
-    { number: 3, title: 'Pricing', icon: CurrencyDollarIcon }
+    { number: 3, title: 'Your Offer', icon: CurrencyDollarIcon }
   ];
 
   const categories = [
@@ -238,19 +234,19 @@ export default function ModernSellPage() {
                 <CheckCircleIcon className="w-10 h-10 text-green-600" />
               </div>
               <h2 className="text-2xl font-sora font-bold text-secondary-800 mb-4">
-                Item Submitted Successfully!
+                Offer Submitted!
               </h2>
               <p className="text-secondary-600 font-inter mb-6">
-                Your item has been submitted for review. You'll receive an email confirmation once it's approved and goes live.
+                Your offer has been sent to the admin. You will receive an email once the admin reviews your offer and either accepts or sends a counter-offer.
               </p>
               <div className="space-y-3">
-                <Link href="/my-auctions">
+                <Link href="/my-offers">
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     className="w-full px-6 py-3 bg-primary-500 text-secondary-800 rounded-xl font-inter font-bold hover:bg-primary-400 transition-all duration-200 shadow-glow"
                   >
-                    View My Items
+                    View My Offers
                   </motion.button>
                 </Link>
                 <Link href="/sell">
@@ -259,7 +255,7 @@ export default function ModernSellPage() {
                     whileTap={{ scale: 0.98 }}
                     className="w-full px-6 py-3 border-2 border-secondary-300 text-secondary-700 rounded-xl font-inter font-bold hover:border-primary-500 hover:text-primary-600 transition-all duration-200"
                   >
-                    List Another Item
+                    Make Another Offer
                   </motion.button>
                 </Link>
               </div>
@@ -304,10 +300,10 @@ export default function ModernSellPage() {
               className="text-center mb-12"
             >
               <h1 className="text-4xl md:text-5xl font-sora font-bold text-white mb-4">
-                Sell with Confidence
+                Sell Directly to Admin
               </h1>
               <p className="text-xl text-white/80 font-inter max-w-2xl mx-auto">
-                List your items on South Africa's most trusted auction platform. Reach thousands of verified buyers.
+                Submit your item and your asking price. The admin will review your offer and may accept or send a counter-offer. If accepted, you will be contacted to arrange the sale.
               </p>
             </motion.div>
 
@@ -540,74 +536,35 @@ export default function ModernSellPage() {
                     </div>
                   )}
 
-                  {/* Step 3: Pricing & Auction Settings */}
+                  {/* Step 3: Your Offer (Direct Sale) */}
                   {step === 3 && (
                     <div className="space-y-6">
                       <div>
                         <h3 className="text-2xl font-sora font-bold text-secondary-800 mb-2">
-                          Pricing & Auction Settings
+                          Your Asking Price
                         </h3>
                         <p className="text-secondary-600 font-inter">
-                          Set your starting price and auction duration to maximize your returns.
+                          Enter the price (ZAR) you would like to receive for your item. The admin will review your offer and may accept or send a counter-offer.
                         </p>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                           <label className="block text-sm font-inter font-medium text-secondary-700 mb-2">
-                            Starting Price (ZAR) *
+                            Asking Price (ZAR) *
                           </label>
                           <div className="relative">
                             <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary-500">R</span>
                             <input
                               type="number"
-                              name="startingPrice"
-                              value={formData.startingPrice}
+                              name="askingPrice"
+                              value={formData.askingPrice}
                               onChange={handleInputChange}
                               className="w-full pl-8 pr-4 py-3 border border-secondary-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent font-inter text-secondary-800"
                               placeholder="0.00"
                               min="1"
                             />
                           </div>
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-inter font-medium text-secondary-700 mb-2">
-                            Reserve Price (ZAR)
-                          </label>
-                          <div className="relative">
-                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary-500">R</span>
-                            <input
-                              type="number"
-                              name="reservePrice"
-                              value={formData.reservePrice}
-                              onChange={handleInputChange}
-                              className="w-full pl-8 pr-4 py-3 border border-secondary-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent font-inter text-secondary-800"
-                              placeholder="0.00 (Optional)"
-                              min="1"
-                            />
-                          </div>
-                          <p className="text-xs text-secondary-500 mt-1">
-                            Minimum price you'll accept. Hidden from bidders.
-                          </p>
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-inter font-medium text-secondary-700 mb-2">
-                            Auction Duration *
-                          </label>
-                          <select
-                            name="auctionDuration"
-                            value={formData.auctionDuration}
-                            onChange={handleInputChange}
-                            className="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent font-inter text-secondary-800"
-                          >
-                            <option value="3">3 days</option>
-                            <option value="5">5 days</option>
-                            <option value="7">7 days</option>
-                            <option value="10">10 days</option>
-                            <option value="14">14 days</option>
-                          </select>
                         </div>
 
                         <div>
