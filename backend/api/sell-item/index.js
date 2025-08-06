@@ -77,7 +77,8 @@ try {
 }
 
 // 📝 Submit item for sale (with image uploads)
-router.post('/submit', upload.array('images', 5), authenticateToken, async (req, res) => {
+// Accept any image field name (upload.any())
+router.post('/submit', upload.any(), authenticateToken, async (req, res) => {
   try {
     const {
       itemTitle,
