@@ -157,7 +157,7 @@ export default function ModernSellPage() {
         submissionData.append(`image_${index}`, image.file);
       });
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sell-item`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sell-item/submit`, {
         method: 'POST',
         body: submissionData,
         headers: {
