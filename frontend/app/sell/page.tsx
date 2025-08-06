@@ -22,9 +22,7 @@ interface SellItemForm {
   category: string;
   condition: string;
   askingPrice: string;
-  shippingOptions: string[];
   location: string;
-  itemWeight: string;
   dimensions: {
     length: string;
     width: string;
@@ -51,9 +49,7 @@ export default function ModernSellPage() {
     category: '',
     condition: '',
     askingPrice: '',
-    shippingOptions: [],
     location: '',
-    itemWeight: '',
     dimensions: {
       length: '',
       width: '',
@@ -104,14 +100,7 @@ export default function ModernSellPage() {
     }
   };
 
-  const handleShippingChange = (option: string) => {
-    setFormData(prev => ({
-      ...prev,
-      shippingOptions: prev.shippingOptions.includes(option)
-        ? prev.shippingOptions.filter(o => o !== option)
-        : [...prev.shippingOptions, option]
-    }));
-  };
+
 
   const validateStep = (stepNumber: number): boolean => {
     switch (stepNumber) {
@@ -565,41 +554,6 @@ export default function ModernSellPage() {
                               min="1"
                             />
                           </div>
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-inter font-medium text-secondary-700 mb-2">
-                            Item Weight (kg)
-                          </label>
-                          <input
-                            type="number"
-                            name="itemWeight"
-                            value={formData.itemWeight}
-                            onChange={handleInputChange}
-                            className="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent font-inter text-secondary-800"
-                            placeholder="0.0"
-                            step="0.1"
-                          />
-                        </div>
-                      </div>
-
-                      {/* Shipping Options */}
-                      <div>
-                        <label className="block text-sm font-inter font-medium text-secondary-700 mb-3">
-                          Shipping Options
-                        </label>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                          {['Collection Only', 'Local Delivery', 'Courier Nationwide', 'Buyer Arranges'].map(option => (
-                            <label key={option} className="flex items-center">
-                              <input
-                                type="checkbox"
-                                checked={formData.shippingOptions.includes(option)}
-                                onChange={() => handleShippingChange(option)}
-                                className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-secondary-300 rounded"
-                              />
-                              <span className="ml-2 text-sm text-secondary-700 font-inter">{option}</span>
-                            </label>
-                          ))}
                         </div>
                       </div>
                     </div>
