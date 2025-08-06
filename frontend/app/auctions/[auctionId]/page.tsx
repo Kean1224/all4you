@@ -1,8 +1,11 @@
 // --- Imports ---
 'use client';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { SparklesIcon } from '@heroicons/react/24/solid';
-// TODO: Import all required components and hooks (BidNotifications, FloatingActionButton, etc.)
+import BidNotifications from '../../components/BidNotifications';
+
+// WebSocket URL (adjust if needed)
+const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:5051';
 
 // --- Timer Component ---
 function LotTimer({ endTime, lotNumber }: { endTime: string; lotNumber: number }) {
@@ -71,6 +74,52 @@ export default function AuctionDetailPage() {
   const [lots, setLots] = React.useState<any[]>([]);
   const [auctionTitle, setAuctionTitle] = React.useState<string>('');
   const [auctionId, setAuctionId] = React.useState<string>('');
+  const wsRef = useRef<WebSocket | null>(null);
+  // --- WebSocket: Live Bidding ---
+  useEffect(() => {
+    // Connect to WebSocket server for live bidding
+    if (!auctionId) return;
+    if (wsRef.current) wsRef.current.close();
+    const ws = new window.WebSocket(`${WS_URL}/?auctionId=${auctionId}`);
+    wsRef.current = ws;
+
+    ws.onopen = () => {
+      // Optionally send auth or join message
+    };
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === 'bid_update' && data.lotId && data.newBid) {
+          setLots((prevLots) => prevLots.map(lot =>
+            lot._id === data.lotId ? { ...lot, currentBid: data.newBid, highestBidder: data.highestBidder } : lot
+          ));
+          setNotifications((prev) => [
+            ...prev,
+            {
+              id: Date.now() + Math.random(),
+              message: `New bid on Lot #${data.lotNumber}: R ${data.newBid.toLocaleString()}`,
+              type: data.isUserOutbid ? 'outbid' : 'success',
+              timestamp: Date.now(),
+            },
+          ]);
+        }
+        if (data.type === 'lot_won' && data.lotId) {
+          setNotifications((prev) => [
+            ...prev,
+            {
+              id: Date.now() + Math.random(),
+              message: `You won Lot #${data.lotNumber}!`,
+              type: 'win',
+              timestamp: Date.now(),
+            },
+          ]);
+        }
+      } catch (e) {}
+    };
+    ws.onerror = () => {};
+    ws.onclose = () => {};
+    return () => { ws.close(); };
+  }, [auctionId]);
   const [isRegistered, setIsRegistered] = React.useState<boolean | null>(null);
   const [registerLoading, setRegisterLoading] = React.useState(false);
   const [pageLoading, setPageLoading] = React.useState(true);
@@ -192,7 +241,50 @@ export default function AuctionDetailPage() {
 
   // Place bid
   const handlePlaceBid = async (lotId: string, currentBid: number, increment: number) => {
-    // ...your bid logic here...
+    try {
+      // Send bid to backend
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/lots/${lotId}/bid`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(userEmail ? { 'X-User-Email': userEmail } : {}),
+        },
+        body: JSON.stringify({ amount: currentBid + increment }),
+        credentials: 'include',
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setNotifications((prev) => [
+          ...prev,
+          {
+            id: Date.now() + Math.random(),
+            message: `Bid placed on Lot!`,
+            type: 'success',
+            timestamp: Date.now(),
+          },
+        ]);
+      } else {
+        setNotifications((prev) => [
+          ...prev,
+          {
+            id: Date.now() + Math.random(),
+            message: data.message || 'Bid failed',
+            type: 'warning',
+            timestamp: Date.now(),
+          },
+        ]);
+      }
+    } catch (e) {
+      setNotifications((prev) => [
+        ...prev,
+        {
+          id: Date.now() + Math.random(),
+          message: 'Network error placing bid',
+          type: 'warning',
+          timestamp: Date.now(),
+        },
+      ]);
+    }
   };
 
   // Quick bid
@@ -267,12 +359,111 @@ export default function AuctionDetailPage() {
 
   // --- Render ---
   return (
-    <main className="min-h-screen px-2 py-10 sm:px-6 bg-gradient-to-br from-yellow-200 via-white to-blue-200 flex justify-center items-start">
+    <main className="min-h-screen px-2 py-10 sm:px-6 bg-gradient-to-br from-yellow-200 via-white to-blue-200 flex flex-col items-center">
       {/* Bid Notifications */}
-      {/* <BidNotifications notifications={notifications} onRemove={removeNotification} /> */}
-      {/* Floating Action Button */}
-      {/* <FloatingActionButton userEmail={userEmail} currentPage="auction" /> */}
-      {/* ...rest of the render code, as in your file... */}
+      <BidNotifications notifications={notifications} onRemove={removeNotification} />
+
+      {/* Auction Title and Info */}
+      <div className="w-full max-w-5xl mb-8">
+        <h1 className="text-3xl font-extrabold text-blue-900 mb-2 flex items-center gap-2">
+          <SparklesIcon className="h-8 w-8 text-yellow-500" />
+          {auctionTitle || 'Auction'}
+        </h1>
+        {auctionEnd ? (
+          <div className="text-lg text-gray-700 font-semibold mb-2">
+            Auction Ends: {new Date(auctionEnd).toLocaleString()}
+          </div>
+        ) : null}
+      </div>
+
+      {/* Lots List */}
+      <div className="w-full max-w-5xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {lots.length === 0 ? (
+          <div className="col-span-full text-center text-gray-500 text-lg py-20">No lots found for this auction.</div>
+        ) : (
+          lots.map((lot: any, idx: number) => {
+            // Calculate lot end time: each lot ends 1 minute after the previous, starting from auctionEnd
+            const lotEndTime = auctionEnd ? new Date(auctionEnd + idx * 60000).toISOString() : '';
+            const lotNumber = idx + 1;
+            const images = lot.images || [];
+            const currentImage = images[(currentImageIndex[lot._id] || 0) % images.length] || '/placeholder.png';
+            const isHighest = isUserHighestBidder(lot);
+            return (
+              <div key={lot._id} className="bg-white rounded-xl shadow-lg p-4 flex flex-col relative border-2 border-blue-100 hover:border-blue-400 transition-all">
+                {/* Lot Number and Timer */}
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-lg font-bold text-blue-700">Lot #{lotNumber}</span>
+                  <LotTimer endTime={lotEndTime} lotNumber={lotNumber} />
+                </div>
+                {/* Lot Image */}
+                <div className="relative w-full h-48 mb-2 flex items-center justify-center bg-gray-50 rounded-lg overflow-hidden">
+                  <img
+                    src={currentImage}
+                    alt={lot.name}
+                    className="object-contain h-full w-full cursor-pointer"
+                    onClick={() => openImageModal(images, currentImageIndex[lot._id] || 0, lot.name)}
+                  />
+                  {images.length > 1 && (
+                    <div className="absolute bottom-2 right-2 flex gap-1">
+                      <button className="bg-white/80 rounded-full p-1 shadow" onClick={() => navigateImage(lot._id, 'prev', images)}>&lt;</button>
+                      <button className="bg-white/80 rounded-full p-1 shadow" onClick={() => navigateImage(lot._id, 'next', images)}>&gt;</button>
+                    </div>
+                  )}
+                </div>
+                {/* Lot Name */}
+                <div className="text-xl font-semibold text-gray-900 mb-1 truncate" title={lot.name}>{lot.name}</div>
+                {/* Lot Description */}
+                <div className="text-gray-700 text-sm mb-2">
+                  {expandedDescriptions[lot._id] ? lot.description : (lot.description?.slice(0, 80) || '')}
+                  {lot.description && lot.description.length > 80 && (
+                    <button className="ml-2 text-blue-500 underline text-xs" onClick={() => toggleDescription(lot._id)}>
+                      {expandedDescriptions[lot._id] ? 'Show less' : 'Read more'}
+                    </button>
+                  )}
+                </div>
+                {/* Current Bid and Bid Button */}
+                <div className="flex items-center justify-between mt-auto">
+                  <div>
+                    <div className="text-gray-600 text-xs">Current Bid</div>
+                    <div className="text-lg font-bold text-green-700">R {lot.currentBid?.toLocaleString() || '0'}</div>
+                    <div className="text-xs text-gray-500">Min Increment: R {lot.bidIncrement || 100}</div>
+                  </div>
+                  <button
+                    className={`px-4 py-2 rounded-lg font-bold text-white shadow transition-all ${isHighest ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}`}
+                    disabled={isHighest || biddingLoading === lot._id}
+                    onClick={() => handlePlaceBid(lot._id, lot.currentBid, lot.bidIncrement)}
+                  >
+                    {isHighest ? 'You are highest' : biddingLoading === lot._id ? 'Bidding...' : 'Bid'}
+                  </button>
+                </div>
+                {/* Watchlist Button */}
+                <button
+                  className={`absolute top-2 right-2 px-2 py-1 rounded text-xs font-bold border ${watchlist.includes(lot._id) ? 'bg-yellow-200 border-yellow-400 text-yellow-900' : 'bg-white border-gray-300 text-gray-500'}`}
+                  onClick={() => toggleWatchlist(lot._id)}
+                >
+                  {watchlist.includes(lot._id) ? '★ Watchlisted' : '☆ Watchlist'}
+                </button>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* Image Modal */}
+      {imageModal.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+          <div className="bg-white rounded-lg shadow-lg p-4 max-w-lg w-full relative flex flex-col items-center">
+            <button className="absolute top-2 right-2 text-gray-500 hover:text-red-500" onClick={closeImageModal}>✕</button>
+            <div className="mb-2 font-bold text-lg">{imageModal.lotTitle}</div>
+            <img src={imageModal.images[imageModal.currentIndex]} alt="Lot" className="max-h-96 w-auto object-contain mb-2" />
+            <div className="flex gap-4 mt-2">
+              <button className="px-3 py-1 bg-gray-200 rounded" onClick={() => navigateModalImage('prev')}>Prev</button>
+              <button className="px-3 py-1 bg-gray-200 rounded" onClick={() => navigateModalImage('next')}>Next</button>
+            </div>
+            <div className="mt-2 text-xs text-gray-500">Image {imageModal.currentIndex + 1} of {imageModal.images.length}</div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
