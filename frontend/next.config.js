@@ -8,7 +8,7 @@ const nextConfig = {
       return [
         {
           source: '/api/:path*',
-          destination: 'http://localhost:5000/api/:path*',
+          destination: 'https://api.all4youauctions.co.za/api/:path*',
         },
       ];
     }
@@ -44,7 +44,7 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'http',
-        hostname: 'localhost',
+        hostname: 'all4youauctions.co.za',
         port: '5000',
         pathname: '/uploads/**',
       },

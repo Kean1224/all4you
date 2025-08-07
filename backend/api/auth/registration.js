@@ -24,7 +24,8 @@ const storage = multer.diskStorage({
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     const extension = path.extname(file.originalname);
     cb(null, `${file.fieldname}-${uniqueSuffix}${extension}`);
-  }
+        }
+      }); // Added closing brace and parenthesis for multer storage config
 
 // File filter for security
 const fileFilter = function (req, file, cb) {
@@ -40,7 +41,6 @@ const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
   limits: { fileSize: 5 * 1024 * 1024 }
-});
 
 // File paths
 const USERS_FILE = path.join(__dirname, '../../data/users.json');
@@ -165,50 +165,48 @@ router.post('/register', upload.fields([
 ]), async (req, res) => {
   try {
     const { name, email, cell, password } = req.body;
-    
+
     // Input validation
     if (!name || !email || !cell || !password) {
       return res.status(400).json({ error: 'All fields are required.' });
     }
-    
+
     // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return res.status(400).json({ error: 'Invalid email format.' });
     }
-    
+
     // Password validation
     if (password.length < 8) {
       return res.status(400).json({ error: 'Password must be at least 8 characters long.' });
     }
-    
+
     // Check for existing users
     const users = readUsers();
     if (users.find(u => u.email === email)) {
       return res.status(409).json({ error: 'Email already registered.' });
     }
-    
+
     // Check for required files
     if (!req.files || !req.files['proofOfAddress'] || !req.files['idCopy']) {
       return res.status(400).json({ error: 'Both proof of address and ID document are required.' });
     }
-    
+
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 12);
-    
+
     // Get uploaded file information
     const proofOfAddress = req.files['proofOfAddress'][0];
-    // Check for empty file buffers/content
-    const proofOfAddress = req.files['proofOfAddress'][0];
     const idCopy = req.files['idCopy'][0];
+    // Check for empty file buffers/content
     if (!proofOfAddress || !proofOfAddress.size || proofOfAddress.size === 0) {
       return res.status(400).json({ error: 'Proof of address file is empty or invalid.' });
     }
     if (!idCopy || !idCopy.size || idCopy.size === 0) {
       return res.status(400).json({ error: 'ID document file is empty or invalid.' });
-    const proofOfAddress = req.files['proofOfAddress'][0];
-    const idCopy = req.files['idCopy'][0];
-    
+    }
+
     // Create pending user data
     const pendingUserData = {
       email,
@@ -218,10 +216,10 @@ router.post('/register', upload.fields([
       idDocument: idCopy.filename,
       proofOfAddress: proofOfAddress.filename
     };
-    
+
     // Save pending user and get verification token
     const verificationToken = savePendingUser(pendingUserData);
-    
+
     // Send verification email
     if (sendMail) {
       const verificationUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/verify-email?token=${verificationToken}`;
@@ -275,25 +273,38 @@ router.post('/register', upload.fields([
         removePendingUser(verificationToken);
         return res.status(500).json({ error: 'Failed to send verification email. Please try again.' });
       }
+    }
+    // Registration route ends here
+    res.json({
+      status: 'success',
+      message: 'Registration successful! Please check your email to verify your account.',
+    });
+  } catch (error) {
+    console.error('Registration error:', error);
+    res.status(500).json({ error: 'Registration failed. Please try again.' });
+  }
+});
+  } catch (error) {
+    console.error('Registration error:', error);
+    res.status(500).json({ error: 'Registration failed. Please try again.' });
+  }
+});
+
+// POST /api/auth/verify-email
+router.post('/verify-email', async (req, res) => {
   const { token } = req.body;
-  
   if (!token) {
     return res.status(400).json({ error: 'Verification token required.' });
   }
-  
   try {
     const pendingUser = getPendingUserByToken(token);
-    
     if (!pendingUser) {
       return res.status(400).json({ error: 'Invalid or expired verification token.' });
     }
-    
     // Create the verified user
     const newUser = createVerifiedUser(pendingUser);
-    
     // Remove from pending users
     removePendingUser(token);
-    
     // Send welcome email to admin for FICA review
     if (sendMail) {
       try {
@@ -318,19 +329,17 @@ router.post('/register', upload.fields([
         console.error('Failed to send admin notification:', emailError);
       }
     }
-    
     // Issue JWT for immediate login
     const jwtToken = jwt.sign(
-      { 
-        email: newUser.email, 
-        name: newUser.name, 
+      {
+        email: newUser.email,
+        name: newUser.name,
         role: 'user',
         id: newUser.id
-      }, 
-      JWT_SECRET, 
+      },
+      JWT_SECRET,
       { expiresIn: JWT_EXPIRES_IN }
     );
-    
     res.json({
       status: 'success',
       message: 'Email verified successfully! Your account is now active, but FICA approval is still pending.',
@@ -343,7 +352,6 @@ router.post('/register', upload.fields([
         isActive: newUser.isActive
       }
     });
-    
   } catch (error) {
     console.error('Email verification error:', error);
     res.status(500).json({ error: 'Verification failed. Please try again.' });
