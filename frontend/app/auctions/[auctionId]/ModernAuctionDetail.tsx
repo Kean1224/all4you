@@ -94,7 +94,7 @@ function LotCard({
     </motion.div>
   );
 }
-'use client';
+
 
 import React, { useState, useEffect, useRef } from 'react';
 // Helper: Scroll to notifications for accessibility
