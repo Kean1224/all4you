@@ -212,6 +212,10 @@ setInterval(() => {
   }
 }, 30000); // Every 30 seconds
 
+const PORT = process.env.PORT || 5051;
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`WebSocket server running on port ${PORT}`);
+});
 console.log('🚀 Enhanced WebSocket server with real-time bidding ready');
 
 // Export for use in API
