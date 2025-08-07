@@ -25,7 +25,7 @@ const storage = multer.diskStorage({
     const extension = path.extname(file.originalname);
     cb(null, `${file.fieldname}-${uniqueSuffix}${extension}`);
         }
-      }); // Added closing brace and parenthesis for multer storage config
+      });
 
 // File filter for security
 const fileFilter = function (req, file, cb) {
@@ -41,6 +41,7 @@ const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
   limits: { fileSize: 5 * 1024 * 1024 }
+});
 
 // File paths
 const USERS_FILE = path.join(__dirname, '../../data/users.json');
@@ -279,11 +280,6 @@ router.post('/register', upload.fields([
       status: 'success',
       message: 'Registration successful! Please check your email to verify your account.',
     });
-  } catch (error) {
-    console.error('Registration error:', error);
-    res.status(500).json({ error: 'Registration failed. Please try again.' });
-  }
-});
   } catch (error) {
     console.error('Registration error:', error);
     res.status(500).json({ error: 'Registration failed. Please try again.' });
