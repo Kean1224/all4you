@@ -4,9 +4,9 @@ const cors = require('cors');
 module.exports = cors({
   origin: [
     // Development URLs
-    'http://localhost:3000',
-    'http://localhost:3001', 
-    'http://localhost:3002',
+    'https://all4youauctions.co.za',
+    'https://www.all4youauctions.co.za',
+    'https://api.all4youauctions.co.za',
     // Render deployment URLs
     'https://all4you-frontend.onrender.com',
     'https://all4you-backend.onrender.com',
@@ -24,4 +24,4 @@ module.exports = cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept']
 });
-EOF < /dev/null
+
