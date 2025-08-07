@@ -1,12 +1,11 @@
-// CORS configuration for Render deployment
 const cors = require('cors');
 
 module.exports = cors({
   origin: [
     // Development URLs
-    'https://all4youauctions.co.za',
-    'https://www.all4youauctions.co.za',
-    'https://api.all4youauctions.co.za',
+    'http://localhost:3000',
+    'http://localhost:3001', 
+    'http://localhost:3002',
     // Render deployment URLs
     'https://all4you-frontend.onrender.com',
     'https://all4you-backend.onrender.com',
