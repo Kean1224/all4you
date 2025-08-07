@@ -1,3 +1,97 @@
+// Top-level LotCard component to fix React hook violation
+function LotCard({
+  lot,
+  auctionId,
+  index,
+  watchlist,
+  toggleWatchlist,
+  expandedDescriptions,
+  toggleDescription,
+  biddingLoading,
+  handlePlaceBid,
+  openImageModal
+}: {
+  lot: Lot;
+  auctionId: string;
+  index: number;
+  watchlist: string[];
+  toggleWatchlist: (lotId: string) => void;
+  expandedDescriptions: { [key: string]: boolean };
+  toggleDescription: (lotId: string) => void;
+  biddingLoading: string | null;
+  handlePlaceBid: (lotId: string, currentBid: number, increment: number) => void;
+  openImageModal: (images: string[], currentIndex: number, lotTitle: string) => void;
+}) {
+  const images = lot.imageUrl ? [lot.imageUrl] : [];
+  const lotNumber = index + 1;
+  const lotEndTime = lot.endTime || '';
+  return (
+    <motion.div
+      key={lot.id}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.08 }}
+      className="bg-white/20 backdrop-blur-2xl border border-white/30 rounded-3xl overflow-hidden hover:bg-white/30 hover:shadow-2xl transition-all duration-300 relative shadow-lg"
+    >
+      {/* Timer and Watchlist */}
+      <div className="absolute top-3 left-3 flex gap-2 items-center z-10">
+        <LotTimer endTime={lotEndTime} lotNumber={lotNumber} />
+      </div>
+      <button
+        className={`absolute top-3 right-3 px-3 py-1 rounded-xl text-xs font-bold border-2 z-10 shadow ${watchlist.includes(lot.id) ? 'bg-yellow-200 border-yellow-400 text-yellow-900' : 'bg-white/30 border-white/50 text-gray-800 hover:bg-white/50'}`}
+        onClick={() => toggleWatchlist(lot.id)}
+      >
+        {watchlist.includes(lot.id) ? '★ Watchlisted' : '☆ Watchlist'}
+      </button>
+      <div className="relative h-52 overflow-hidden cursor-pointer group" onClick={() => openImageModal(images, 0, lot.title)}>
+        {lot.imageUrl ? (
+          <Image
+            src={lot.imageUrl}
+            alt={lot.title || 'Auction Lot Image'}
+            fill
+            className="object-cover group-hover:scale-110 transition-transform duration-500"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = '';
+            }}
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center">
+            <TagIcon className="w-12 h-12 text-gray-400" />
+          </div>
+        )}
+      </div>
+      <div className="p-7 flex flex-col h-full">
+        <h3 className="text-xl font-extrabold text-gray-900 mb-2 line-clamp-2 drop-shadow-lg">{lot.title}</h3>
+        {lot.description && (
+          <p className="text-gray-700 text-base mb-4 line-clamp-2 font-light">
+            {expandedDescriptions[lot.id] ? lot.description : (lot.description?.slice(0, 80) || '')}
+            {lot.description && lot.description.length > 80 && (
+              <button className="ml-2 text-green-600 underline text-xs font-semibold" onClick={e => { e.stopPropagation(); toggleDescription(lot.id); }}>
+                {expandedDescriptions[lot.id] ? 'Show less' : 'Read more'}
+              </button>
+            )}
+          </p>
+        )}
+        <div className="flex items-center justify-between mt-auto">
+          <div>
+            <div className="text-gray-500 text-xs">Current Bid</div>
+            <div className="text-xl font-extrabold text-green-600">R{(lot.currentBid || 0).toLocaleString()}</div>
+            <div className="text-xs text-gray-400">Min Increment: R{lot.bidIncrement || 100}</div>
+          </div>
+          <button
+            className={`px-5 py-2 rounded-xl font-bold text-white shadow-lg transition-all text-base ${biddingLoading === lot.id ? 'bg-gray-400 cursor-not-allowed' : 'bg-gradient-to-r from-green-500 to-green-700 hover:from-green-600 hover:to-green-800'}`}
+            disabled={biddingLoading === lot.id}
+            onClick={() => handlePlaceBid(lot.id, lot.currentBid, lot.bidIncrement || 100)}
+          >
+            {biddingLoading === lot.id ? 'Bidding...' : 'Bid'}
+          </button>
+        </div>
+        <div className="text-right text-gray-500 text-xs mt-2">{lot.bidHistory?.length || 0} bids</div>
+      </div>
+    </motion.div>
+  );
+}
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -635,79 +729,19 @@ export default function AuctionDetailPage() {
               {auction.lots.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {auction.lots.map((lot, index) => (
-                    // Inline LotCard as an inner function
-                    (function LotCard({ lot, auctionId, index }: { lot: Lot; auctionId: string; index: number }) {
-                      // Images array for modal/gallery support
-                      const images = lot.imageUrl ? [lot.imageUrl] : [];
-                      const lotNumber = index + 1;
-                      const lotEndTime = lot.endTime || '';
-                      return (
-                        <motion.div
-                          key={lot.id}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: index * 0.08 }}
-                          className="bg-white/20 backdrop-blur-2xl border border-white/30 rounded-3xl overflow-hidden hover:bg-white/30 hover:shadow-2xl transition-all duration-300 relative shadow-lg"
-                        >
-                          {/* Timer and Watchlist */}
-                          <div className="absolute top-3 left-3 flex gap-2 items-center z-10">
-                            <LotTimer endTime={lotEndTime} lotNumber={lotNumber} />
-                          </div>
-                          <button
-                            className={`absolute top-3 right-3 px-3 py-1 rounded-xl text-xs font-bold border-2 z-10 shadow ${watchlist.includes(lot.id) ? 'bg-yellow-200 border-yellow-400 text-yellow-900' : 'bg-white/30 border-white/50 text-gray-800 hover:bg-white/50'}`}
-                            onClick={() => toggleWatchlist(lot.id)}
-                          >
-                            {watchlist.includes(lot.id) ? '★ Watchlisted' : '☆ Watchlist'}
-                          </button>
-                          <div className="relative h-52 overflow-hidden cursor-pointer group" onClick={() => openImageModal(images, 0, lot.title)}>
-                            {lot.imageUrl ? (
-                              <Image
-                                src={lot.imageUrl}
-                                alt={lot.title || 'Auction Lot Image'}
-                                fill
-                                className="object-cover group-hover:scale-110 transition-transform duration-500"
-                                onError={(e) => {
-                                  const target = e.target as HTMLImageElement;
-            target.src = '';
-                                }}
-                              />
-                            ) : (
-                              <div className="w-full h-full bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center">
-                                <TagIcon className="w-12 h-12 text-gray-400" />
-                              </div>
-                            )}
-                          </div>
-                          <div className="p-7 flex flex-col h-full">
-                            <h3 className="text-xl font-extrabold text-gray-900 mb-2 line-clamp-2 drop-shadow-lg">{lot.title}</h3>
-                            {lot.description && (
-                              <p className="text-gray-700 text-base mb-4 line-clamp-2 font-light">
-                                {expandedDescriptions[lot.id] ? lot.description : (lot.description?.slice(0, 80) || '')}
-                                {lot.description && lot.description.length > 80 && (
-                                  <button className="ml-2 text-green-600 underline text-xs font-semibold" onClick={e => { e.stopPropagation(); toggleDescription(lot.id); }}>
-                                    {expandedDescriptions[lot.id] ? 'Show less' : 'Read more'}
-                                  </button>
-                                )}
-                              </p>
-                            )}
-                            <div className="flex items-center justify-between mt-auto">
-                              <div>
-                                <div className="text-gray-500 text-xs">Current Bid</div>
-                                <div className="text-xl font-extrabold text-green-600">R{(lot.currentBid || 0).toLocaleString()}</div>
-                                <div className="text-xs text-gray-400">Min Increment: R{lot.bidIncrement || 100}</div>
-                              </div>
-                              <button
-                                className={`px-5 py-2 rounded-xl font-bold text-white shadow-lg transition-all text-base ${biddingLoading === lot.id ? 'bg-gray-400 cursor-not-allowed' : 'bg-gradient-to-r from-green-500 to-green-700 hover:from-green-600 hover:to-green-800'}`}
-                                disabled={biddingLoading === lot.id}
-                                onClick={() => handlePlaceBid(lot.id, lot.currentBid, lot.bidIncrement || 100)}
-                              >
-                                {biddingLoading === lot.id ? 'Bidding...' : 'Bid'}
-                              </button>
-                            </div>
-                            <div className="text-right text-gray-500 text-xs mt-2">{lot.bidHistory?.length || 0} bids</div>
-                          </div>
-                        </motion.div>
-                      );
-                    })({ lot, auctionId: auction.id, index })
+                    <LotCard
+                      key={lot.id}
+                      lot={lot}
+                      auctionId={auction.id}
+                      index={index}
+                      watchlist={watchlist}
+                      toggleWatchlist={toggleWatchlist}
+                      expandedDescriptions={expandedDescriptions}
+                      toggleDescription={toggleDescription}
+                      biddingLoading={biddingLoading}
+                      handlePlaceBid={handlePlaceBid}
+                      openImageModal={openImageModal}
+                    />
                   ))}
                 </div>
               ) : (
