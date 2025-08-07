@@ -9,13 +9,13 @@
     "increment": 10,
     "createdAt": "2025-07-20T09:00:00.000Z",
     "viewCount": 5,
-    "auctionImage": "/logo.png",
+    "auctionImage": "",
     "lots": [
       {
         "id": "lot1",
         "title": "Antique Vase",
         "description": "A beautiful antique vase from the 19th century.",
-        "imageUrl": "/logo.png",
+        "imageUrl": "",
         "currentBid": 170,
         "status": "open",
         "bidHistory": [
@@ -74,16 +74,29 @@
         "id": "lot-demo-1",
         "title": "Modern Art Painting",
         "description": "A vibrant modern art piece, perfect for contemporary spaces.",
-        "imageUrl": "/logo.png",
+        "imageUrl": "",
         "currentBid": 500,
         "status": "open",
         "bidHistory": [
-          { "bidderEmail": "user1@example.com", "amount": 300, "time": "2025-08-01T10:00:00.000Z" },
-          { "bidderEmail": "user2@example.com", "amount": 400, "time": "2025-08-02T12:00:00.000Z" },
-          { "bidderEmail": "user3@example.com", "amount": 500, "time": "2025-08-03T14:00:00.000Z" }
+          {
+            "bidderEmail": "user1@example.com",
+            "amount": 300,
+            "time": "2025-08-01T10:00:00.000Z"
+          },
+          {
+            "bidderEmail": "user2@example.com",
+            "amount": 400,
+            "time": "2025-08-02T12:00:00.000Z"
+          },
+          {
+            "bidderEmail": "user3@example.com",
+            "amount": 500,
+            "time": "2025-08-03T14:00:00.000Z"
+          }
         ],
         "bidIncrement": 50,
-        "endTime": "2025-08-10T18:00:00.000Z"
+        "endTime": "2025-08-10T18:00:00.000Z",
+        "lotNumber": 1
       }
     ],
     "depositRequired": false,
@@ -102,5 +115,19 @@
     "depositRequired": false,
     "depositAmount": 0,
     "createdAt": "2025-07-23T12:16:02.326Z"
+  },
+  {
+    "id": "5b2d777c-8e46-409a-93ad-f6b4be20b03b",
+    "title": "gbfgb",
+    "description": "dgfbdfgbgfbdfgb",
+    "location": "dgfbdgfb",
+    "startTime": "2025-08-12T14:24",
+    "endTime": "2025-08-14T14:24",
+    "increment": 10,
+    "depositRequired": false,
+    "depositAmount": 0,
+    "auctionImage": null,
+    "lots": [],
+    "createdAt": "2025-08-06T12:24:54.128Z"
   }
 ]

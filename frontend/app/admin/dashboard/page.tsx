@@ -41,7 +41,11 @@ export default function AdminDashboardPage() {
             <Card title="💰 Payment Management" href="/admin/payments" />
             <Card title="Item Offers" href="/admin/offers" />
             <Card title="Logout" onClick={() => {
-              localStorage.removeItem('isAdmin');
+              // Properly clear admin JWT on logout
+              localStorage.removeItem('admin_jwt');
+              localStorage.removeItem('userEmail');
+              localStorage.removeItem('userRole');
+              localStorage.removeItem('admin_login_time');
               router.push('/admin/login');
             }} />
           </div>

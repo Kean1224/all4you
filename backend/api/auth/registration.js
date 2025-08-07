@@ -17,21 +17,18 @@ if (!fs.existsSync(ficaDir)) {
 
 // Configure multer for FICA document uploads
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
+  destination: function (req, file, cb) {
     cb(null, ficaDir);
   },
-  filename: (req, file, cb) => {
+  filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     const extension = path.extname(file.originalname);
     cb(null, `${file.fieldname}-${uniqueSuffix}${extension}`);
   }
-});
 
 // File filter for security
-const fileFilter = (req, file, cb) => {
+const fileFilter = function (req, file, cb) {
   const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
-  const maxSize = 5 * 1024 * 1024; // 5MB
-
   if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
@@ -39,10 +36,10 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-const upload = multer({ 
-  storage, 
-  fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+const upload = multer({
+  storage: storage,
+  fileFilter: fileFilter,
+  limits: { fileSize: 5 * 1024 * 1024 }
 });
 
 // File paths
@@ -219,7 +216,6 @@ router.post('/register', upload.fields([
     // Send verification email
     if (sendMail) {
       const verificationUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/verify-email?token=${verificationToken}`;
-      
       try {
         await sendMail({
           to: email,
@@ -231,30 +227,16 @@ router.post('/register', upload.fields([
                 <h1 style="color: #d97706; margin: 0;">All4You Auctions</h1>
                 <p style="color: #666; margin: 5px 0;">South Africa's Premier Online Auction Platform</p>
               </div>
-              
               <div style="background: #f8f9fa; padding: 30px; border-radius: 10px; border-left: 4px solid #d97706;">
                 <h2 style="color: #333; margin-top: 0;">Welcome ${name}!</h2>
-                <p style="color: #666; line-height: 1.6;">
-                  Thank you for registering with All4You Auctions. We're excited to have you join our community of bidders and sellers.
-                </p>
-                
-                <p style="color: #666; line-height: 1.6;">
-                  To complete your registration and start participating in auctions, please verify your email address by clicking the button below:
-                </p>
-                
+                <p style="color: #666; line-height: 1.6;">Thank you for registering with All4You Auctions. We're excited to have you join our community of bidders and sellers.</p>
+                <p style="color: #666; line-height: 1.6;">To complete your registration and start participating in auctions, please verify your email address by clicking the button below:</p>
                 <div style="text-align: center; margin: 30px 0;">
-                  <a href="${verificationUrl}" 
-                     style="background-color: #d97706; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block;">
-                    ✅ Verify My Email Address
-                  </a>
+                  <a href="${verificationUrl}" style="background-color: #d97706; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block;">✅ Verify My Email Address</a>
                 </div>
-                
                 <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 6px; padding: 15px; margin: 20px 0;">
-                  <p style="margin: 0; color: #856404; font-size: 14px;">
-                    <strong>⏰ Important:</strong> This verification link will expire in 24 hours for security reasons.
-                  </p>
+                  <p style="margin: 0; color: #856404; font-size: 14px;"><strong>⏰ Important:</strong> This verification link will expire in 24 hours for security reasons.</p>
                 </div>
-                
                 <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd;">
                   <h3 style="color: #333; margin-bottom: 10px;">What happens next?</h3>
                   <ol style="color: #666; line-height: 1.6;">
@@ -263,22 +245,17 @@ router.post('/register', upload.fields([
                     <li>Your FICA documents will be verified</li>
                     <li>Once approved, you can start bidding on auctions!</li>
                   </ol>
+                  <p>If you didn't create this account, please ignore this email.</p>
+                  <p>For support, contact us at admin@all4youauctions.co.za</p>
+                  <p style="margin-top: 20px;"><strong>All4You Auctions</strong><br>South Africa's Trusted Auction Platform</p>
                 </div>
               </div>
-              
-              <div style="text-align: center; margin-top: 30px; color: #999; font-size: 12px;">
-                <p>If you didn't create this account, please ignore this email.</p>
-                <p>For support, contact us at admin@all4youauctions.co.za</p>
-                <p style="margin-top: 20px;">
-                  <strong>All4You Auctions</strong><br>
-                  South Africa's Trusted Auction Platform
-                </p>
-              </div>
             </div>
-          `
+          `,
         });
-        
+        // Always log the verification link for local testing
         console.log(`✅ Verification email sent to ${email}`);
+        console.log(`🔗 [LOCAL TESTING] Verification link: ${verificationUrl}`);
       } catch (emailError) {
         console.error('Failed to send verification email:', emailError);
         // Clean up files and pending user if email fails
@@ -289,40 +266,6 @@ router.post('/register', upload.fields([
         removePendingUser(verificationToken);
         return res.status(500).json({ error: 'Failed to send verification email. Please try again.' });
       }
-    }
-    
-    res.json({ 
-      status: 'verification_required', 
-      message: 'Registration successful! Please check your email and click the verification link to complete your account setup.',
-      email: email
-    });
-    
-  } catch (error) {
-    console.error('Registration error:', error);
-    
-    // Clean up uploaded files on error
-    if (req.files) {
-      Object.values(req.files).flat().forEach(file => {
-        try {
-          fs.unlinkSync(file.path);
-        } catch {}
-      });
-    }
-    
-    if (error.code === 'LIMIT_FILE_SIZE') {
-      return res.status(400).json({ error: 'File size too large. Maximum 5MB per file.' });
-    }
-    
-    if (error.message.includes('Invalid file type')) {
-      return res.status(400).json({ error: error.message });
-    }
-    
-    res.status(500).json({ error: 'Registration failed. Please try again.' });
-  }
-});
-
-// POST /api/auth/verify-email
-router.post('/verify-email', async (req, res) => {
   const { token } = req.body;
   
   if (!token) {

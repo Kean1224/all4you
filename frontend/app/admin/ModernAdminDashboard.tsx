@@ -140,14 +140,6 @@ export default function ModernAdminDashboard() {
 
   const quickActions: QuickAction[] = [
     {
-      id: 'create-auction',
-      title: 'Create Auction',
-      description: 'Start a new auction event',
-      icon: TrophyIcon,
-      href: '/admin/auctions/create',
-      color: 'green'
-    },
-    {
       id: 'manage-users',
       title: 'Manage Users',
       description: 'View and manage user accounts',
@@ -217,13 +209,7 @@ export default function ModernAdminDashboard() {
               <div className="bg-red-500/20 text-red-400 px-3 py-1 rounded-full text-sm font-medium">
                 {stats.pendingApprovals} Pending Approvals
               </div>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="bg-gradient-to-r from-green-400 to-emerald-500 text-black px-6 py-2 rounded-xl font-semibold"
-              >
-                Create Auction
-              </motion.button>
+              {/* Removed Create Auction button */}
             </div>
           </div>
         </div>

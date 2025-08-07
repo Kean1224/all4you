@@ -1,9 +1,19 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+// Helper: Scroll to notifications for accessibility
+function scrollToNotifications() {
+  const el = document.getElementById('auction-notifications');
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
 import BidNotifications from '../../components/BidNotifications';
-// WebSocket URL (adjust if needed)
+// WebSocket URL for local development (adjust if needed)
+// Make sure to set NEXT_PUBLIC_WS_URL in your .env.local for production or custom setups
 const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:5051';
+
+// API URL for local development
+// Make sure to set NEXT_PUBLIC_API_URL in your .env.local for production or custom setups
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 // Timer component for each lot
 function LotTimer({ endTime, lotNumber }: { endTime: string; lotNumber: number }) {
   const [timeLeft, setTimeLeft] = useState<string>('');
@@ -103,8 +113,22 @@ export default function AuctionDetailPage() {
   useEffect(() => {
     if (!auctionId) return;
     if (wsRef.current) wsRef.current.close();
-    const ws = new window.WebSocket(`${WS_URL}/?auctionId=${auctionId}`);
-    wsRef.current = ws;
+    let ws;
+    try {
+      ws = new window.WebSocket(`${WS_URL}/?auctionId=${auctionId}`);
+      wsRef.current = ws;
+    } catch (e) {
+      setNotifications((prev) => [
+        ...prev,
+        {
+          id: Date.now() + Math.random(),
+          message: 'WebSocket connection failed: ' + (e instanceof Error ? e.message : ''),
+          type: 'error',
+          timestamp: Date.now(),
+        },
+      ]);
+      return;
+    }
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
@@ -139,11 +163,46 @@ export default function AuctionDetailPage() {
             },
           ]);
         }
-      } catch (e) {}
+      } catch (e) {
+        setNotifications((prev) => [
+          ...prev,
+          {
+            id: Date.now() + Math.random(),
+            message: 'WebSocket message error: ' + (e instanceof Error ? e.message : ''),
+            type: 'error',
+            timestamp: Date.now(),
+          },
+        ]);
+      }
     };
-    ws.onerror = () => {};
-    ws.onclose = () => {};
-    return () => { ws.close(); };
+    ws.onerror = (event) => {
+      setNotifications((prev) => [
+        ...prev,
+        {
+          id: Date.now() + Math.random(),
+          message: 'WebSocket error: ' + (event && event.message ? event.message : ''),
+          type: 'error',
+          timestamp: Date.now(),
+        },
+      ]);
+    };
+    ws.onclose = (event) => {
+      setNotifications((prev) => [
+        ...prev,
+        {
+          id: Date.now() + Math.random(),
+          message: 'WebSocket closed' + (event && event.reason ? ': ' + event.reason : ''),
+          type: 'warning',
+          timestamp: Date.now(),
+        },
+      ]);
+    };
+    return () => {
+      if (wsRef.current) {
+        wsRef.current.close();
+        wsRef.current = null;
+      }
+    };
   }, [auctionId]);
   // Remove notification by id
   const removeNotification = (id: any) => {
@@ -154,13 +213,27 @@ export default function AuctionDetailPage() {
   const handlePlaceBid = async (lotId: string, currentBid: number, increment: number) => {
     setBiddingLoading(lotId);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/lots/${lotId}/bid`, {
+      const res = await fetch(`${API_URL}/api/lots/${lotId}/bid`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ amount: currentBid + increment }),
         credentials: 'include',
       });
-      const data = await res.json();
+      let data;
+      try {
+        data = await res.json();
+      } catch (jsonErr) {
+        setNotifications((prev) => [
+          ...prev,
+          {
+            id: Date.now() + Math.random(),
+            message: 'Invalid server response when placing bid',
+            type: 'error',
+            timestamp: Date.now(),
+          },
+        ]);
+        return;
+      }
       if (res.ok && data.success) {
         setNotifications((prev) => [
           ...prev,
@@ -176,8 +249,8 @@ export default function AuctionDetailPage() {
           ...prev,
           {
             id: Date.now() + Math.random(),
-            message: data.message || 'Bid failed',
-            type: 'warning',
+            message: (data && data.message) ? data.message : 'Bid failed',
+            type: 'error',
             timestamp: Date.now(),
           },
         ]);
@@ -187,8 +260,8 @@ export default function AuctionDetailPage() {
         ...prev,
         {
           id: Date.now() + Math.random(),
-          message: 'Network error placing bid',
-          type: 'warning',
+          message: 'Network error placing bid: ' + (e instanceof Error ? e.message : ''),
+          type: 'error',
           timestamp: Date.now(),
         },
       ]);
@@ -197,7 +270,42 @@ export default function AuctionDetailPage() {
     }
   };
 
-  // Watchlist
+  // Watchlist (persist to localStorage)
+  useEffect(() => {
+    // Load watchlist from localStorage on mount
+    try {
+      const stored = localStorage.getItem('auction_watchlist');
+      if (stored) setWatchlist(JSON.parse(stored));
+    } catch (e) {
+      setNotifications((prev) => [
+        ...prev,
+        {
+          id: Date.now() + Math.random(),
+          message: 'Failed to load watchlist: ' + (e instanceof Error ? e.message : ''),
+          type: 'error',
+          timestamp: Date.now(),
+        },
+      ]);
+    }
+  }, []);
+
+  useEffect(() => {
+    // Save watchlist to localStorage on change
+    try {
+      localStorage.setItem('auction_watchlist', JSON.stringify(watchlist));
+    } catch (e) {
+      setNotifications((prev) => [
+        ...prev,
+        {
+          id: Date.now() + Math.random(),
+          message: 'Failed to save watchlist: ' + (e instanceof Error ? e.message : ''),
+          type: 'error',
+          timestamp: Date.now(),
+        },
+      ]);
+    }
+  }, [watchlist]);
+
   const toggleWatchlist = (lotId: string) => {
     setWatchlist((prev) =>
       prev.includes(lotId) ? prev.filter((id) => id !== lotId) : [...prev, lotId]
@@ -209,8 +317,14 @@ export default function AuctionDetailPage() {
     setExpandedDescriptions((prev) => ({ ...prev, [lotId]: !prev[lotId] }));
   };
 
-  // Image modal
-  const openImageModal = (images: string[], currentIndex: number, lotTitle: string) => setImageModal({ isOpen: true, images, currentIndex, lotTitle });
+  // Image modal (with accessibility improvements)
+  const openImageModal = (images: string[], currentIndex: number, lotTitle: string) => {
+    setImageModal({ isOpen: true, images, currentIndex, lotTitle });
+    setTimeout(() => {
+      const modal = document.getElementById('image-modal');
+      if (modal) modal.focus();
+    }, 100);
+  };
   const closeImageModal = () => setImageModal({ isOpen: false, images: [], currentIndex: 0, lotTitle: '' });
   const navigateModalImage = (direction: 'prev' | 'next') => {
     setImageModal((prev) => {
@@ -225,26 +339,63 @@ export default function AuctionDetailPage() {
   const [auction, setAuction] = useState<Auction | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
   const [isWatched, setIsWatched] = useState(false);
   const [activeTab, setActiveTab] = useState<'lots' | 'details'>('lots');
 
   useEffect(() => {
     fetchAuction();
-  }, [auctionId]);
+    // eslint-disable-next-line
+  }, [auctionId, retryCount]);
 
   const fetchAuction = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auctions/${auctionId}`);
-      
+      const response = await fetch(`${API_URL}/api/auctions/${auctionId}`);
       if (!response.ok) {
-        throw new Error('Auction not found');
+        setError('Auction not found (server returned ' + response.status + ')');
+        setNotifications((prev) => [
+          ...prev,
+          {
+            id: Date.now() + Math.random(),
+            message: 'Auction not found (server returned ' + response.status + ')',
+            type: 'error',
+            timestamp: Date.now(),
+          },
+        ]);
+        setTimeout(scrollToNotifications, 100);
+        return;
       }
-      
-      const auctionData = await response.json();
+      let auctionData;
+      try {
+        auctionData = await response.json();
+      } catch (jsonErr) {
+        setError('Invalid server response');
+        setNotifications((prev) => [
+          ...prev,
+          {
+            id: Date.now() + Math.random(),
+            message: 'Invalid server response',
+            type: 'error',
+            timestamp: Date.now(),
+          },
+        ]);
+        setTimeout(scrollToNotifications, 100);
+        return;
+      }
       setAuction(auctionData);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load auction');
+      setNotifications((prev) => [
+        ...prev,
+        {
+          id: Date.now() + Math.random(),
+          message: 'Failed to load auction: ' + (err instanceof Error ? err.message : ''),
+          type: 'error',
+          timestamp: Date.now(),
+        },
+      ]);
+      setTimeout(scrollToNotifications, 100);
     } finally {
       setLoading(false);
     }
@@ -303,6 +454,17 @@ export default function AuctionDetailPage() {
     // TODO: Add to watchlist API call
   };
 
+  if (!process.env.NEXT_PUBLIC_API_URL) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center">
+        <div className="text-center">
+          <div className="bg-yellow-400 text-black px-6 py-4 rounded-lg font-semibold shadow-lg mb-6">
+            <span className="text-lg">Warning: <b>NEXT_PUBLIC_API_URL</b> is not set. Using <b>http://localhost:5000</b> for API calls. Set this in your <b>.env.local</b> for custom or production environments.</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center">
@@ -314,12 +476,24 @@ export default function AuctionDetailPage() {
     );
   }
 
+  // Error Banner with Retry
   if (error || !auction) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-white mb-4">Auction Not Found</h1>
-          <p className="text-gray-400 mb-6">{error || 'The auction you\'re looking for doesn\'t exist.'}</p>
+          <div id="auction-notifications" />
+          <div className="mb-6">
+            <div className="bg-red-600 text-white px-6 py-4 rounded-lg font-semibold shadow-lg flex flex-col items-center gap-2">
+              <span className="text-lg">{error || 'The auction you\'re looking for doesn\'t exist.'}</span>
+              <button
+                className="mt-2 px-4 py-2 bg-white text-red-700 rounded font-bold hover:bg-gray-100 transition-colors"
+                onClick={() => { setRetryCount((c) => c + 1); setError(null); }}
+                aria-label="Retry loading auction"
+              >
+                Retry
+              </button>
+            </div>
+          </div>
           <Link href="/auctions" className="bg-green-400 text-black px-6 py-3 rounded-lg font-semibold hover:bg-green-300 transition-colors">
             Browse Auctions
           </Link>
@@ -329,91 +503,90 @@ export default function AuctionDetailPage() {
   }
 
   const status = getAuctionStatus();
-  const auctionImage = auction.auctionImage || '/images/default-auction.jpg';
+  const auctionImage = auction.auctionImage || '';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black">
+    <div className="min-h-screen bg-gradient-to-br from-[#0f2027] via-[#2c5364] to-[#232526]">
       {/* Bid Notifications */}
+      <div id="auction-notifications" />
       <BidNotifications notifications={notifications} onRemove={removeNotification} />
       {/* Header */}
-      <div className="bg-black/20 backdrop-blur-sm border-b border-white/10">
+      <div className="bg-white/10 backdrop-blur-xl border-b border-white/20 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
-            <Link href="/auctions" className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
+            <Link href="/auctions" className="flex items-center gap-2 text-gray-300 hover:text-green-400 transition-colors font-semibold">
               <ArrowLeftIcon className="w-5 h-5" />
               Back to Auctions
             </Link>
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.08 }}
+              whileTap={{ scale: 0.96 }}
               onClick={handleWatchToggle}
-              className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
+              className="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-green-400/80 to-green-600/80 hover:from-green-500 hover:to-green-700 text-black rounded-xl font-bold shadow-lg transition-all border border-green-300/40"
             >
               {isWatched ? (
                 <HeartSolidIcon className="w-5 h-5 text-red-500" />
               ) : (
-                <HeartIcon className="w-5 h-5 text-white" />
+                <HeartIcon className="w-5 h-5 text-black" />
               )}
-              <span className="text-white">{isWatched ? 'Watching' : 'Watch Auction'}</span>
+              <span>{isWatched ? 'Watching' : 'Watch Auction'}</span>
             </motion.button>
           </div>
         </div>
       </div>
 
       {/* Auction Hero Section */}
-      <div className="relative h-96 overflow-hidden">
+      <div className="relative h-96 overflow-hidden rounded-b-3xl shadow-2xl">
         <Image
           src={auctionImage}
-          alt={auction.title}
+          alt={auction.title || 'Auction Image'}
           fill
-          className="object-cover"
+          className="object-cover scale-105 blur-[1px] brightness-75"
           onError={(e) => {
             const target = e.target as HTMLImageElement;
-            target.src = '/images/default-auction.jpg';
+                                  target.src = '';
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-        
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
         {/* Hero Content */}
         <div className="absolute bottom-0 left-0 right-0 p-8">
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
               <div>
                 {getStatusBadge(status)}
-                <h1 className="text-4xl md:text-5xl font-bold text-white mt-4 mb-2">
+                <h1 className="text-5xl md:text-6xl font-extrabold text-white mt-4 mb-2 drop-shadow-lg tracking-tight">
                   {auction.title}
                 </h1>
                 {auction.description && (
-                  <p className="text-xl text-gray-300 max-w-2xl">
+                  <p className="text-2xl text-gray-200 max-w-2xl font-light drop-shadow">
                     {auction.description}
                   </p>
                 )}
               </div>
-              
-              <div className="bg-black/60 backdrop-blur-sm rounded-2xl p-6 min-w-[300px]">
-                <h3 className="text-white font-semibold mb-4">Auction Details</h3>
-                <div className="space-y-3 text-sm">
-                  <div className="flex items-center gap-2 text-gray-300">
-                    <CalendarIcon className="w-4 h-4 text-green-400" />
-                    <span className="font-medium">Starts:</span>
+              <div className="bg-white/20 backdrop-blur-2xl rounded-2xl p-8 min-w-[320px] shadow-xl border border-white/30">
+                <h3 className="text-gray-900 font-bold mb-4 text-lg">Auction Details</h3>
+                <div className="space-y-3 text-base">
+                  <div className="flex items-center gap-2 text-gray-800">
+                    <CalendarIcon className="w-4 h-4 text-green-500" />
+                    <span className="font-semibold">Starts:</span>
                     <span>{formatDate(auction.startTime)}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-gray-300">
-                    <ClockIcon className="w-4 h-4 text-red-400" />
-                    <span className="font-medium">Ends:</span>
+                  <div className="flex items-center gap-2 text-gray-800">
+                    <ClockIcon className="w-4 h-4 text-red-500" />
+                    <span className="font-semibold">Ends:</span>
                     <span>{formatDate(auction.endTime)}</span>
                   </div>
                   {auction.location && (
-                    <div className="flex items-center gap-2 text-gray-300">
-                      <MapPinIcon className="w-4 h-4 text-blue-400" />
-                      <span className="font-medium">Location:</span>
+                    <div className="flex items-center gap-2 text-blue-800">
+                      <MapPinIcon className="w-4 h-4 text-blue-500" />
+                      <span className="font-semibold">Location:</span>
                       <span>{auction.location}</span>
                     </div>
                   )}
                   {auction.depositRequired && (
-                    <div className="flex items-center gap-2 text-yellow-400">
+                    <div className="flex items-center gap-2 text-yellow-700">
                       <ExclamationTriangleIcon className="w-4 h-4" />
-                      <span className="font-medium">Deposit Required:</span>
+                      <span className="font-semibold">Deposit Required:</span>
                       <span>R{(auction.depositAmount || 0).toLocaleString()}</span>
                     </div>
                   )}
@@ -425,25 +598,25 @@ export default function AuctionDetailPage() {
       </div>
 
       {/* Content Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Tab Navigation */}
-        <div className="flex items-center gap-4 mb-8">
+        <div className="flex items-center gap-4 mb-10">
           <button
             onClick={() => setActiveTab('lots')}
-            className={`px-6 py-3 rounded-xl font-semibold transition-all ${
+            className={`px-7 py-3 rounded-2xl font-bold text-lg shadow transition-all border-2 ${
               activeTab === 'lots'
-                ? 'bg-green-400 text-black'
-                : 'bg-white/10 text-white hover:bg-white/20'
+                ? 'bg-gradient-to-r from-green-400 to-green-600 text-black border-green-400 shadow-lg scale-105'
+                : 'bg-white/10 text-white border-white/20 hover:bg-white/20 hover:scale-105'
             }`}
           >
             Lots ({auction.lots.length})
           </button>
           <button
             onClick={() => setActiveTab('details')}
-            className={`px-6 py-3 rounded-xl font-semibold transition-all ${
+            className={`px-7 py-3 rounded-2xl font-bold text-lg shadow transition-all border-2 ${
               activeTab === 'details'
-                ? 'bg-green-400 text-black'
-                : 'bg-white/10 text-white hover:bg-white/20'
+                ? 'bg-gradient-to-r from-green-400 to-green-600 text-black border-green-400 shadow-lg scale-105'
+                : 'bg-white/10 text-white border-white/20 hover:bg-white/20 hover:scale-105'
             }`}
           >
             Auction Details
@@ -460,7 +633,7 @@ export default function AuctionDetailPage() {
               exit={{ opacity: 0, y: -20 }}
             >
               {auction.lots.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {auction.lots.map((lot, index) => (
                     // Inline LotCard as an inner function
                     (function LotCard({ lot, auctionId, index }: { lot: Lot; auctionId: string; index: number }) {
@@ -473,26 +646,30 @@ export default function AuctionDetailPage() {
                           key={lot.id}
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: index * 0.1 }}
-                          className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden hover:bg-white/10 transition-all duration-300 relative"
+                          transition={{ delay: index * 0.08 }}
+                          className="bg-white/20 backdrop-blur-2xl border border-white/30 rounded-3xl overflow-hidden hover:bg-white/30 hover:shadow-2xl transition-all duration-300 relative shadow-lg"
                         >
                           {/* Timer and Watchlist */}
                           <div className="absolute top-3 left-3 flex gap-2 items-center z-10">
                             <LotTimer endTime={lotEndTime} lotNumber={lotNumber} />
                           </div>
                           <button
-                            className={`absolute top-3 right-3 px-2 py-1 rounded text-xs font-bold border z-10 ${watchlist.includes(lot.id) ? 'bg-yellow-200 border-yellow-400 text-yellow-900' : 'bg-white/20 border-gray-300 text-gray-200 hover:bg-white/30'}`}
+                            className={`absolute top-3 right-3 px-3 py-1 rounded-xl text-xs font-bold border-2 z-10 shadow ${watchlist.includes(lot.id) ? 'bg-yellow-200 border-yellow-400 text-yellow-900' : 'bg-white/30 border-white/50 text-gray-800 hover:bg-white/50'}`}
                             onClick={() => toggleWatchlist(lot.id)}
                           >
                             {watchlist.includes(lot.id) ? '★ Watchlisted' : '☆ Watchlist'}
                           </button>
-                          <div className="relative h-48 overflow-hidden cursor-pointer" onClick={() => openImageModal(images, 0, lot.title)}>
+                          <div className="relative h-52 overflow-hidden cursor-pointer group" onClick={() => openImageModal(images, 0, lot.title)}>
                             {lot.imageUrl ? (
                               <Image
                                 src={lot.imageUrl}
-                                alt={lot.title}
+                                alt={lot.title || 'Auction Lot Image'}
                                 fill
-                                className="object-cover hover:scale-105 transition-transform duration-300"
+                                className="object-cover group-hover:scale-110 transition-transform duration-500"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+            target.src = '';
+                                }}
                               />
                             ) : (
                               <div className="w-full h-full bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center">
@@ -500,13 +677,13 @@ export default function AuctionDetailPage() {
                               </div>
                             )}
                           </div>
-                          <div className="p-6">
-                            <h3 className="text-lg font-bold text-white mb-2 line-clamp-2">{lot.title}</h3>
+                          <div className="p-7 flex flex-col h-full">
+                            <h3 className="text-xl font-extrabold text-gray-900 mb-2 line-clamp-2 drop-shadow-lg">{lot.title}</h3>
                             {lot.description && (
-                              <p className="text-gray-400 text-sm mb-4 line-clamp-2">
+                              <p className="text-gray-700 text-base mb-4 line-clamp-2 font-light">
                                 {expandedDescriptions[lot.id] ? lot.description : (lot.description?.slice(0, 80) || '')}
                                 {lot.description && lot.description.length > 80 && (
-                                  <button className="ml-2 text-green-400 underline text-xs" onClick={e => { e.stopPropagation(); toggleDescription(lot.id); }}>
+                                  <button className="ml-2 text-green-600 underline text-xs font-semibold" onClick={e => { e.stopPropagation(); toggleDescription(lot.id); }}>
                                     {expandedDescriptions[lot.id] ? 'Show less' : 'Read more'}
                                   </button>
                                 )}
@@ -514,19 +691,19 @@ export default function AuctionDetailPage() {
                             )}
                             <div className="flex items-center justify-between mt-auto">
                               <div>
-                                <div className="text-gray-400 text-xs">Current Bid</div>
-                                <div className="text-lg font-bold text-green-400">R{(lot.currentBid || 0).toLocaleString()}</div>
-                                <div className="text-xs text-gray-500">Min Increment: R{lot.bidIncrement || 100}</div>
+                                <div className="text-gray-500 text-xs">Current Bid</div>
+                                <div className="text-xl font-extrabold text-green-600">R{(lot.currentBid || 0).toLocaleString()}</div>
+                                <div className="text-xs text-gray-400">Min Increment: R{lot.bidIncrement || 100}</div>
                               </div>
                               <button
-                                className={`px-4 py-2 rounded-lg font-bold text-white shadow transition-all ${biddingLoading === lot.id ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}`}
+                                className={`px-5 py-2 rounded-xl font-bold text-white shadow-lg transition-all text-base ${biddingLoading === lot.id ? 'bg-gray-400 cursor-not-allowed' : 'bg-gradient-to-r from-green-500 to-green-700 hover:from-green-600 hover:to-green-800'}`}
                                 disabled={biddingLoading === lot.id}
                                 onClick={() => handlePlaceBid(lot.id, lot.currentBid, lot.bidIncrement || 100)}
                               >
                                 {biddingLoading === lot.id ? 'Bidding...' : 'Bid'}
                               </button>
                             </div>
-                            <div className="text-right text-gray-300 text-xs mt-2">{lot.bidHistory?.length || 0} bids</div>
+                            <div className="text-right text-gray-500 text-xs mt-2">{lot.bidHistory?.length || 0} bids</div>
                           </div>
                         </motion.div>
                       );
@@ -534,10 +711,10 @@ export default function AuctionDetailPage() {
                   ))}
                 </div>
               ) : (
-                <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-12 text-center">
-                  <TrophyIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-xl font-bold text-white mb-2">No Lots Available</h3>
-                  <p className="text-gray-400">This auction doesn't have any lots yet. Check back soon!</p>
+                <div className="bg-white/20 backdrop-blur-2xl border border-white/30 rounded-3xl p-16 text-center shadow-xl">
+                  <TrophyIcon className="w-20 h-20 text-gray-400 mx-auto mb-6" />
+                  <h3 className="text-2xl font-extrabold text-gray-900 mb-2">No Lots Available</h3>
+                  <p className="text-gray-600">This auction doesn't have any lots yet. Check back soon!</p>
                 </div>
               )}
             </motion.div>
@@ -549,27 +726,27 @@ export default function AuctionDetailPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8"
+              className="bg-white/20 backdrop-blur-2xl border border-white/30 rounded-3xl p-12 shadow-xl"
             >
-              <h3 className="text-2xl font-bold text-white mb-6">Auction Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-4">
+              <h3 className="text-3xl font-extrabold text-gray-900 mb-8">Auction Information</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <div className="space-y-6">
                   <div>
-                    <h4 className="text-lg font-semibold text-white mb-2">Bidding Information</h4>
-                    <div className="space-y-2 text-gray-300">
-                      <p><span className="font-medium">Bid Increment:</span> R{auction.increment}</p>
-                      <p><span className="font-medium">Total Lots:</span> {auction.lots.length}</p>
-                      <p><span className="font-medium">Deposit Required:</span> {auction.depositRequired ? `Yes (R${(auction.depositAmount || 0).toLocaleString()})` : 'No'}</p>
+                    <h4 className="text-xl font-bold text-gray-900 mb-3">Bidding Information</h4>
+                    <div className="space-y-2 text-gray-700 text-base">
+                      <p><span className="font-semibold">Bid Increment:</span> R{auction.increment}</p>
+                      <p><span className="font-semibold">Total Lots:</span> {auction.lots.length}</p>
+                      <p><span className="font-semibold">Deposit Required:</span> {auction.depositRequired ? `Yes (R${(auction.depositAmount || 0).toLocaleString()})` : 'No'}</p>
                     </div>
                   </div>
                 </div>
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <div>
-                    <h4 className="text-lg font-semibold text-white mb-2">Auction Stats</h4>
-                    <div className="space-y-2 text-gray-300">
-                      <p><span className="font-medium">Created:</span> {new Date(auction.createdAt).toLocaleDateString()}</p>
-                      <p><span className="font-medium">Views:</span> {auction.viewCount || 0}</p>
-                      <p><span className="font-medium">Status:</span> <span className="capitalize">{status}</span></p>
+                    <h4 className="text-xl font-bold text-gray-900 mb-3">Auction Stats</h4>
+                    <div className="space-y-2 text-gray-700 text-base">
+                      <p><span className="font-semibold">Created:</span> {new Date(auction.createdAt).toLocaleDateString()}</p>
+                      <p><span className="font-semibold">Views:</span> {auction.viewCount || 0}</p>
+                      <p><span className="font-semibold">Status:</span> <span className="capitalize">{status}</span></p>
                     </div>
                   </div>
                 </div>

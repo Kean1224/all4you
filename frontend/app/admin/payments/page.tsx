@@ -54,7 +54,27 @@ interface PaymentModalData {
   currentStatus: string;
 }
 
+import { useRouter } from 'next/navigation';
 export default function AdminPaymentsPage() {
+  const router = useRouter();
+  useEffect(() => {
+    const token = localStorage.getItem('admin_jwt');
+    if (!token) {
+      router.push('/admin/login');
+      return;
+    }
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      if (payload.role !== 'admin' || !payload.email || !payload.exp || Date.now() / 1000 > payload.exp) {
+        router.push('/admin/login');
+        return;
+      }
+    } catch {
+      router.push('/admin/login');
+      return;
+    }
+    fetchData();
+  }, [router]);
   const [activeTab, setActiveTab] = useState<'overview' | 'invoices' | 'deposits'>('overview');
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [deposits, setDeposits] = useState<Deposit[]>([]);
@@ -67,10 +87,6 @@ export default function AdminPaymentsPage() {
     notes: '',
     depositAmount: 0
   });
-
-  useEffect(() => {
-    fetchData();
-  }, []);
 
   const fetchData = async () => {
     setLoading(true);

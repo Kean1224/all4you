@@ -60,7 +60,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="ALL4YOU Auctions" />
-        <link rel="apple-touch-icon" href="/img/ChatGPT%20Image%20Jul%2028,%202025,%2011_14_52%20PM.png" />
+        {/* Removed logo reference */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>

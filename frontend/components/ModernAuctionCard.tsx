@@ -138,7 +138,7 @@ export default function ModernAuctionCard({ auction, index = 0 }: AuctionCardPro
     });
   };
 
-  const auctionImage = auction.auctionImage || auction.image || '/images/default-auction.jpg';
+  const auctionImage = auction.auctionImage || auction.image || '';
   const lotCount = auction.totalLots || auction.lots?.length || 0;
 
   return (
@@ -160,7 +160,7 @@ export default function ModernAuctionCard({ auction, index = 0 }: AuctionCardPro
             className="object-cover group-hover:scale-105 transition-transform duration-500"
             onError={(e) => {
               const target = e.target as HTMLImageElement;
-              target.src = '/images/default-auction.jpg';
+              target.src = '';
             }}
           />
           

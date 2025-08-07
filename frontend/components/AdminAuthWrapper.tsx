@@ -2,22 +2,24 @@
 
 import { useAdminAuth } from '../hooks/useAdminAuth';
 import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface AdminAuthWrapperProps {
   children: React.ReactNode;
 }
 
+
 export default function AdminAuthWrapper({ children }: AdminAuthWrapperProps) {
   const { isAuthenticated, loading, logout } = useAdminAuth();
+  const router = useRouter();
 
-  // Add session timeout warning
+  // Add session timeout warning and redirect if not authenticated
   useEffect(() => {
     if (isAuthenticated) {
       // Set login timestamp if not already set
       if (!localStorage.getItem('admin_login_time')) {
         localStorage.setItem('admin_login_time', Date.now().toString());
       }
-
       // Add page visibility change listener to logout on tab close/blur
       const handleVisibilityChange = () => {
         if (document.hidden) {
@@ -28,28 +30,20 @@ export default function AdminAuthWrapper({ children }: AdminAuthWrapperProps) {
               logout();
             }
           }, 30 * 60 * 1000); // 30 minutes of inactivity
-
-          // Store timeout ID to clear it later
           (window as any).inactivityTimeout = timeoutId;
         } else {
-          // Page is visible again, clear the timeout
           if ((window as any).inactivityTimeout) {
             clearTimeout((window as any).inactivityTimeout);
             delete (window as any).inactivityTimeout;
           }
         }
       };
-
       document.addEventListener('visibilitychange', handleVisibilityChange);
-
-      // Prevent right-click context menu in admin areas (basic protection)
       const preventRightClick = (e: MouseEvent) => {
         e.preventDefault();
         return false;
       };
-
       document.addEventListener('contextmenu', preventRightClick);
-
       return () => {
         document.removeEventListener('visibilitychange', handleVisibilityChange);
         document.removeEventListener('contextmenu', preventRightClick);
@@ -57,36 +51,18 @@ export default function AdminAuthWrapper({ children }: AdminAuthWrapperProps) {
           clearTimeout((window as any).inactivityTimeout);
         }
       };
+    } else if (!loading) {
+      // Not authenticated and not loading: redirect to login
+      router.replace('/admin/login');
     }
-  }, [isAuthenticated, logout]);
+  }, [isAuthenticated, loading, logout, router]);
+
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Verifying admin credentials...</p>
-          <p className="mt-2 text-sm text-gray-500">This may take a few seconds...</p>
-        </div>
-      </div>
-    );
+    return null;
   }
-
   if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="mb-4 text-red-600">
-            <svg className="mx-auto h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-            </svg>
-          </div>
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">Access Restricted</h2>
-          <p className="text-gray-600 mb-4">Admin authentication required</p>
-          <p className="text-sm text-gray-500">Redirecting to login...</p>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   return (

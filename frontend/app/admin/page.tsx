@@ -55,9 +55,23 @@ type QuickAction = {
 };
 
 export default function ModernAdminDashboard() {
-
-
   const router = useRouter();
+  // Secure: Only show admin dashboard if valid admin_jwt is present
+  useEffect(() => {
+    const token = localStorage.getItem('admin_jwt');
+    if (!token) {
+      router.push('/admin/login');
+      return;
+    }
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      if (payload.role !== 'admin' || !payload.email || !payload.exp || Date.now() / 1000 > payload.exp) {
+        router.push('/admin/login');
+      }
+    } catch {
+      router.push('/admin/login');
+    }
+  }, [router]);
   const [activeTab, setActiveTab] = useState('overview');
   const [stats, setStats] = useState<DashboardStats>({
     totalUsers: 0,
@@ -72,9 +86,18 @@ export default function ModernAdminDashboard() {
   const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Only fetch dashboard data after authentication check passes
+  // (The authentication check useEffect above will redirect if not authenticated)
   useEffect(() => {
-    // No token check, always allow dashboard for testing
-    fetchDashboardData();
+    const token = localStorage.getItem('admin_jwt');
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      if (payload.role === 'admin' && payload.email && payload.exp && Date.now() / 1000 < payload.exp) {
+        fetchDashboardData();
+      }
+    } catch {
+      // Do nothing, already redirected
+    }
   }, []);
 
   const fetchDashboardData = async () => {
@@ -95,7 +118,8 @@ export default function ModernAdminDashboard() {
       try {
         const usersRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users`, { headers });
         if (usersRes.ok) {
-          users = await usersRes.json();
+          const usersData = await usersRes.json();
+          users = Array.isArray(usersData) ? usersData : [];
         }
       } catch (error) {
         console.error('Error fetching users:', error);
@@ -104,7 +128,8 @@ export default function ModernAdminDashboard() {
       try {
         const auctionsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auctions`, { headers });
         if (auctionsRes.ok) {
-          auctions = await auctionsRes.json();
+          const auctionsData = await auctionsRes.json();
+          auctions = Array.isArray(auctionsData) ? auctionsData : [];
         }
       } catch (error) {
         console.error('Error fetching auctions:', error);
@@ -113,7 +138,8 @@ export default function ModernAdminDashboard() {
       try {
         const offersRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sell-item/admin/all`, { headers });
         if (offersRes.ok) {
-          offers = await offersRes.json();
+          const offersData = await offersRes.json();
+          offers = Array.isArray(offersData) ? offersData : [];
         }
       } catch (error) {
         console.error('Error fetching offers:', error);
@@ -233,14 +259,6 @@ export default function ModernAdminDashboard() {
 
   const quickActions: QuickAction[] = [
     {
-      id: 'create-auction',
-      title: 'Create Auction',
-      description: 'Start a new auction event',
-      icon: TrophyIcon,
-      href: '/admin/auctions/create',
-      color: 'green'
-    },
-    {
       id: 'manage-users',
       title: 'Manage Users',
       description: 'View and manage user accounts',
@@ -317,14 +335,7 @@ export default function ModernAdminDashboard() {
               <div className="bg-red-500/20 text-red-400 px-3 py-1 rounded-full text-sm font-medium">
                 {stats.pendingApprovals} Pending Approvals
               </div>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => router.push('/admin/create-auction')}
-                className="bg-gradient-to-r from-green-400 to-emerald-500 text-black px-6 py-2 rounded-xl font-semibold"
-              >
-                Create Auction
-              </motion.button>
+              {/* Removed Create Auction button */}
             </div>
           </div>
         </div>
