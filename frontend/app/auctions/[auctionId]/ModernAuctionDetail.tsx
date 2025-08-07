@@ -1,3 +1,5 @@
+"use client";
+
 // Top-level LotCard component to fix React hook violation
 function LotCard({
   lot,
