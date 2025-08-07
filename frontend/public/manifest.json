@@ -12,13 +12,13 @@
   "categories": ["business", "shopping"],
   "icons": [
     {
-      "src": "/img/ChatGPT%20Image%20Jul%2028,%202025,%2011_14_52%20PM.png",
+      "src": "/images/default-auction.jpg",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/img/ChatGPT%20Image%20Jul%2028,%202025,%2011_14_52%20PM.png",
+      "src": "/images/default-auction.jpg",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
