@@ -63,8 +63,8 @@ try {
 }
 
 // JWT configuration
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-key';
-const JWT_EXPIRES_IN = '7d';
+const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN;
 
 // Helper functions
 function readUsers() {
@@ -215,7 +215,7 @@ router.post('/register', upload.fields([
     
     // Send verification email
     if (sendMail) {
-      const verificationUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/verify-email?token=${verificationToken}`;
+      const verificationUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/verify-email?token=${verificationToken}`;
       try {
         await sendMail({
           to: email,
@@ -378,7 +378,7 @@ router.post('/resend-verification', async (req, res) => {
     
     // Send new verification email
     if (sendMail) {
-      const verificationUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/verify-email?token=${newToken}`;
+      const verificationUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/verify-email?token=${newToken}`;
       
       await sendMail({
         to: email,
