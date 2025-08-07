@@ -87,7 +87,7 @@ export function useAuctionWebSocket({
     }
 
     try {
-      const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:5050';
+      const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:5051';
       wsRef.current = new WebSocket(wsUrl);
 
       wsRef.current.onopen = () => {

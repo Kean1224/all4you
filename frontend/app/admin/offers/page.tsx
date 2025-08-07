@@ -30,7 +30,7 @@ export default function AdminOffersPage() {
     try {
       const response = await fetch('/api/sell-item/admin/all', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+          'Authorization': `Bearer ${localStorage.getItem('admin_jwt')}`
         }
       });
       
@@ -54,7 +54,7 @@ export default function AdminOffersPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+          'Authorization': `Bearer ${localStorage.getItem('admin_jwt')}`
         },
         body: JSON.stringify({ offerId, status: newStatus })
       });

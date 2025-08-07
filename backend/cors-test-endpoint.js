@@ -4,7 +4,7 @@ const router = express.Router();
 // Test endpoint with explicit CORS headers
 router.get('/ping-cors-test', (req, res) => {
   // Set CORS headers explicitly
-  res.header('Access-Control-Allow-Origin', 'https://groot-cvb5.onrender.com');
+  res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
   res.header('Access-Control-Allow-Credentials', 'true');
