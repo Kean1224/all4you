@@ -198,6 +198,15 @@ router.post('/register', upload.fields([
     
     // Get uploaded file information
     const proofOfAddress = req.files['proofOfAddress'][0];
+    // Check for empty file buffers/content
+    const proofOfAddress = req.files['proofOfAddress'][0];
+    const idCopy = req.files['idCopy'][0];
+    if (!proofOfAddress || !proofOfAddress.size || proofOfAddress.size === 0) {
+      return res.status(400).json({ error: 'Proof of address file is empty or invalid.' });
+    }
+    if (!idCopy || !idCopy.size || idCopy.size === 0) {
+      return res.status(400).json({ error: 'ID document file is empty or invalid.' });
+    const proofOfAddress = req.files['proofOfAddress'][0];
     const idCopy = req.files['idCopy'][0];
     
     // Create pending user data
