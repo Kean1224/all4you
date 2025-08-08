@@ -193,13 +193,12 @@ export default function WatchlistPage() {
                         alt={lot.title}
                         className="w-full h-full object-cover cursor-pointer transition-transform duration-300 group-hover:scale-105"
                         onClick={() => {
-                          // Create a simple image viewer for single images
                           const imgSrc = lot.image ? 
                             (lot.image.startsWith('/uploads') ? `${process.env.NEXT_PUBLIC_API_URL}${lot.image}` : `${process.env.NEXT_PUBLIC_API_URL}/uploads/lots/${lot.image}`) :
                             lot.imageUrl ? 
                               (lot.imageUrl.startsWith('/uploads') ? `${process.env.NEXT_PUBLIC_API_URL}${lot.imageUrl}` : `${process.env.NEXT_PUBLIC_API_URL}/uploads/lots/${lot.imageUrl}`) :
                             '/placeholder.jpg';
-                          // ...existing code...
+                          window.open(imgSrc, '_blank');
                         }}
                       />
                     ) : (
@@ -209,13 +208,6 @@ export default function WatchlistPage() {
                         className="w-full h-full object-cover cursor-pointer transition-transform duration-300 group-hover:scale-105"
                       />
                     )}
-                          (lot.image.startsWith('/uploads') ? `${process.env.NEXT_PUBLIC_API_URL}${lot.image}` : `${process.env.NEXT_PUBLIC_API_URL}/uploads/lots/${lot.image}`) :
-                        lot.imageUrl ? 
-                          (lot.imageUrl.startsWith('/uploads') ? `${process.env.NEXT_PUBLIC_API_URL}${lot.imageUrl}` : `${process.env.NEXT_PUBLIC_API_URL}/uploads/lots/${lot.imageUrl}`) :
-                        '/placeholder.jpg';
-                        window.open(imgSrc, '_blank');
-                      }}
-                    />
                     
                     {/* Magnifying Glass Overlay */}
                     <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300 flex items-center justify-center cursor-pointer">
