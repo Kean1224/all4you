@@ -244,104 +244,83 @@ export default function Header() {
 
         {/* MOBILE NAV */}
         {menuOpen && (
-          <div className="md:hidden px-3 pb-4 bg-black text-green-400 text-base font-bold transition-all rounded-b-2xl shadow-2xl border-t border-yellow-400/50">
-            
-            <div className="flex flex-col gap-1 pt-3">
+          <div className="md:hidden bg-black shadow-2xl">
+            <div className="py-2 px-4 space-y-1">
               
-              {/* General Navigation Section */}
-              <div className="bg-black rounded-lg p-3 mb-2 border border-green-400">
-                <p className="font-bold text-green-400 mb-2 text-center text-base">📍 General</p>
-                <div className="flex flex-col gap-2">
-                  <Link href="/terms" className={`py-2 px-3 rounded-lg bg-green-500 hover:bg-green-400 text-black transition-all duration-200 flex items-center gap-3 text-lg font-semibold`} onClick={() => setMenuOpen(false)}>
-                    📋 Terms
-                  </Link>
-                  <Link href="/contact" className={`py-2 px-3 rounded-lg bg-green-500 hover:bg-green-400 text-black transition-all duration-200 flex items-center gap-3 text-lg font-semibold`} onClick={() => setMenuOpen(false)}>
-                    📞 Contact
-                  </Link>
-                </div>
-              </div>
+              {/* General Links */}
+              <Link href="/terms" className="block py-3 px-4 text-white bg-gray-800 hover:bg-gray-700 rounded-md text-sm font-medium" onClick={() => setMenuOpen(false)}>
+                📋 Terms
+              </Link>
+              <Link href="/contact" className="block py-3 px-4 text-white bg-gray-800 hover:bg-gray-700 rounded-md text-sm font-medium" onClick={() => setMenuOpen(false)}>
+                📞 Contact
+              </Link>
               
-              {/* Auction Navigation Section - Show only for logged-in users */}
+              {/* User-only links */}
               {isLoggedIn && (
                 <>
-                  <div className="bg-black rounded-lg p-3 mb-2 border border-green-400">
-                    <p className="font-bold text-green-400 mb-2 text-center text-base">🏛️ Auctions</p>
-                    <div className="flex flex-col gap-2">
-                      <Link href="/auctions" className={`py-2 px-3 rounded-lg bg-green-500 hover:bg-green-400 text-black transition-all duration-200 flex items-center gap-3 text-lg font-semibold`} onClick={() => setMenuOpen(false)}>
-                        🏛️ Current Auctions
-                      </Link>
-                      <Link href="/auctions/past" className={`py-2 px-3 rounded-lg bg-green-500 hover:bg-green-400 text-black transition-all duration-200 flex items-center gap-3 text-lg font-semibold`} onClick={() => setMenuOpen(false)}>
-                        📜 Past Auctions
-                      </Link>
-                      <Link href="/watchlist" className={`py-2 px-3 rounded-lg bg-green-500 hover:bg-green-400 text-black transition-all duration-200 flex items-center gap-3 text-lg font-semibold`} onClick={() => setMenuOpen(false)}>
-                        ❤️ Watchlist
-                      </Link>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-black rounded-lg p-3 mb-2 border border-green-400">
-                    <p className="font-bold text-green-400 mb-2 text-center text-base">📄 My Invoices</p>
-                    <div className="flex flex-col gap-2">
-                      <Link href="/account/buyer" className="py-2 px-3 rounded-lg bg-green-500 hover:bg-green-400 text-black transition-all duration-200 flex items-center gap-3 text-lg font-semibold" onClick={() => setMenuOpen(false)}>
-                        🛒 Buyer Invoices
-                      </Link>
-                      <Link href="/account/seller" className="py-2 px-3 rounded-lg bg-green-500 hover:bg-green-400 text-black transition-all duration-200 flex items-center gap-3 text-lg font-semibold" onClick={() => setMenuOpen(false)}>
-                        💰 Seller Invoices
-                      </Link>
-                    </div>
-                  </div>
-                  
-                  <Link href="/my-auctions/invoices" className={`py-2 px-3 rounded-lg bg-green-500 hover:bg-green-400 text-black transition-all duration-200 flex items-center gap-2 text-xs`} onClick={() => setMenuOpen(false)}>
-                    <span className="font-bold text-lg">📊 My Auctions</span>
+                  <Link href="/auctions" className="block py-3 px-4 text-white bg-gray-800 hover:bg-gray-700 rounded-md text-sm font-medium" onClick={() => setMenuOpen(false)}>
+                    🏛️ Current Auctions
                   </Link>
-                  
-                  {/* Sell Item Button - Enhanced prominence */}
-                  <Link href="/sell" className={`py-2 px-3 bg-green-500 hover:bg-green-400 rounded-lg transition-all duration-200 font-bold shadow-md text-black flex items-center gap-2 border border-green-400 text-xs`} onClick={() => setMenuOpen(false)}>
-                    <span className="font-bold text-lg">💎 Sell Item</span>
+                  <Link href="/auctions/past" className="block py-3 px-4 text-white bg-gray-800 hover:bg-gray-700 rounded-md text-sm font-medium" onClick={() => setMenuOpen(false)}>
+                    📜 Past Auctions
+                  </Link>
+                  <Link href="/watchlist" className="block py-3 px-4 text-white bg-gray-800 hover:bg-gray-700 rounded-md text-sm font-medium" onClick={() => setMenuOpen(false)}>
+                    ❤️ Watchlist
+                  </Link>
+                  <Link href="/account/buyer" className="block py-3 px-4 text-white bg-gray-800 hover:bg-gray-700 rounded-md text-sm font-medium" onClick={() => setMenuOpen(false)}>
+                    🛒 Buyer Invoices
+                  </Link>
+                  <Link href="/account/seller" className="block py-3 px-4 text-white bg-gray-800 hover:bg-gray-700 rounded-md text-sm font-medium" onClick={() => setMenuOpen(false)}>
+                    💰 Seller Invoices
+                  </Link>
+                  <Link href="/my-auctions/invoices" className="block py-3 px-4 text-white bg-gray-800 hover:bg-gray-700 rounded-md text-sm font-medium" onClick={() => setMenuOpen(false)}>
+                    📊 My Auctions
+                  </Link>
+                  <Link href="/sell" className="block py-3 px-4 text-black bg-green-500 hover:bg-green-400 rounded-md text-sm font-bold" onClick={() => setMenuOpen(false)}>
+                    💎 Sell Item
                   </Link>
                 </>
               )}
 
-              {/* Admin links - only for admins */}
+              {/* Admin links */}
               {isAdmin && (
-                <div className="bg-black rounded-lg p-3 mb-2 border border-green-400">
-                  <p className="font-bold text-green-400 mb-2 text-center text-base">🔧 Admin Panel</p>
-                  <div className="flex flex-col gap-2">
-                    <Link href="/admin/inbox" className="py-2 px-3 rounded-lg bg-green-500 hover:bg-green-400 text-black transition-all duration-200 flex items-center gap-3 text-lg font-semibold" onClick={() => setMenuOpen(false)}>
-                      🔧 Admin Inbox
-                    </Link>
-                    <Link href="/admin/refunds" className="py-2 px-3 rounded-lg bg-green-500 hover:bg-green-400 text-black transition-all duration-200 flex items-center gap-3 text-lg font-semibold" onClick={() => setMenuOpen(false)}>
-                      💸 Refunds
-                    </Link>
-                  </div>
-                </div>
+                <>
+                  <Link href="/admin/inbox" className="block py-3 px-4 text-white bg-red-600 hover:bg-red-500 rounded-md text-sm font-medium" onClick={() => setMenuOpen(false)}>
+                    🔧 Admin Inbox
+                  </Link>
+                  <Link href="/admin/refunds" className="block py-3 px-4 text-white bg-red-600 hover:bg-red-500 rounded-md text-sm font-medium" onClick={() => setMenuOpen(false)}>
+                    💸 Refunds
+                  </Link>
+                </>
               )}
 
-              {/* Authentication links */}
+              {/* Authentication */}
               {!isLoggedIn ? (
-                <div className="border-t border-green-400 pt-4 mt-4 flex flex-col gap-2">
-                  <Link href="/login" className={`py-2 px-3 bg-green-500 rounded-lg transition-all duration-200 hover:bg-green-400 flex items-center gap-3 justify-center font-bold text-black text-lg`} onClick={() => setMenuOpen(false)}>
+                <div className="pt-2 mt-2 border-t border-gray-700">
+                  <Link href="/login" className="block py-3 px-4 text-black bg-yellow-400 hover:bg-yellow-300 rounded-md text-sm font-bold text-center" onClick={() => setMenuOpen(false)}>
                     🔐 Login
                   </Link>
-                  <Link href="/register" className={`py-2 px-3 bg-green-500 rounded-lg transition-all duration-200 hover:bg-green-400 font-bold shadow-md flex items-center gap-3 justify-center text-black text-lg`} onClick={() => setMenuOpen(false)}>
+                  <Link href="/register" className="block py-3 px-4 mt-1 text-black bg-yellow-500 hover:bg-yellow-400 rounded-md text-sm font-bold text-center" onClick={() => setMenuOpen(false)}>
                     ✨ Register
                   </Link>
                 </div>
               ) : (
-                <button 
-                  onClick={() => {
-                    localStorage.removeItem('userEmail');
-                    localStorage.removeItem('token');
-                    setIsLoggedIn(false);
-                    setUserEmail('');
-                    setIsAdmin(false);
-                    setMenuOpen(false);
-                    window.location.href = '/';
-                  }}
-                  className="mt-4 py-2 px-3 bg-green-500 rounded-lg transition-all duration-200 hover:bg-green-400 font-bold shadow-md flex items-center gap-3 justify-center border-t border-green-400 pt-4 text-black text-lg"
-                >
-                  🚪 Logout
-                </button>
+                <div className="pt-2 mt-2 border-t border-gray-700">
+                  <button 
+                    onClick={() => {
+                      localStorage.removeItem('userEmail');
+                      localStorage.removeItem('token');
+                      setIsLoggedIn(false);
+                      setUserEmail('');
+                      setIsAdmin(false);
+                      setMenuOpen(false);
+                      window.location.href = '/';
+                    }}
+                    className="w-full py-3 px-4 text-white bg-red-600 hover:bg-red-500 rounded-md text-sm font-medium text-center"
+                  >
+                    🚪 Logout
+                  </button>
+                </div>
               )}
             </div>
           </div>
