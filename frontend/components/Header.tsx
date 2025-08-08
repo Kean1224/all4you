@@ -244,39 +244,39 @@ export default function Header() {
 
         {/* MOBILE NAV */}
         {menuOpen && (
-          <div className="md:hidden bg-black shadow-2xl">
+          <div className="md:hidden bg-gradient-to-r from-yellow-500 via-yellow-600 to-orange-500 shadow-2xl">
             <div className="py-2 px-4 space-y-1">
               
               {/* General Links */}
-              <Link href="/terms" className="block py-3 px-4 text-white bg-gray-800 hover:bg-gray-700 rounded-md text-sm font-medium" onClick={() => setMenuOpen(false)}>
+              <Link href="/terms" className={`block ${isActive('/terms')} px-3 py-2 rounded-full transition-all duration-200 hover:bg-white/20 hover:backdrop-blur-sm text-sm font-semibold`} onClick={() => setMenuOpen(false)}>
                 📋 Terms
               </Link>
-              <Link href="/contact" className="block py-3 px-4 text-white bg-gray-800 hover:bg-gray-700 rounded-md text-sm font-medium" onClick={() => setMenuOpen(false)}>
+              <Link href="/contact" className={`block ${isActive('/contact')} px-3 py-2 rounded-full transition-all duration-200 hover:bg-white/20 hover:backdrop-blur-sm text-sm font-semibold`} onClick={() => setMenuOpen(false)}>
                 📞 Contact
               </Link>
               
               {/* User-only links */}
               {isLoggedIn && (
                 <>
-                  <Link href="/auctions" className="block py-3 px-4 text-white bg-gray-800 hover:bg-gray-700 rounded-md text-sm font-medium" onClick={() => setMenuOpen(false)}>
-                    🏛️ Current Auctions
+                  <Link href="/auctions" className={`block ${isActive('/auctions')} px-3 py-2 rounded-full transition-all duration-200 hover:bg-white/20 hover:backdrop-blur-sm text-sm font-semibold`} onClick={() => setMenuOpen(false)}>
+                    🏛️ Auctions
                   </Link>
-                  <Link href="/auctions/past" className="block py-3 px-4 text-white bg-gray-800 hover:bg-gray-700 rounded-md text-sm font-medium" onClick={() => setMenuOpen(false)}>
+                  <Link href="/auctions/past" className={`block ${isActive('/auctions/past')} px-3 py-2 rounded-full transition-all duration-200 hover:bg-white/20 hover:backdrop-blur-sm text-sm font-semibold`} onClick={() => setMenuOpen(false)}>
                     📜 Past Auctions
                   </Link>
-                  <Link href="/watchlist" className="block py-3 px-4 text-white bg-gray-800 hover:bg-gray-700 rounded-md text-sm font-medium" onClick={() => setMenuOpen(false)}>
+                  <Link href="/watchlist" className={`block ${isActive('/watchlist')} px-3 py-2 rounded-full transition-all duration-200 hover:bg-white/20 hover:backdrop-blur-sm text-sm font-semibold`} onClick={() => setMenuOpen(false)}>
                     ❤️ Watchlist
                   </Link>
-                  <Link href="/account/buyer" className="block py-3 px-4 text-white bg-gray-800 hover:bg-gray-700 rounded-md text-sm font-medium" onClick={() => setMenuOpen(false)}>
+                  <Link href="/account/buyer" className={`block ${isActive('/account/buyer')} px-3 py-2 rounded-full transition-all duration-200 hover:bg-white/20 hover:backdrop-blur-sm text-sm font-semibold`} onClick={() => setMenuOpen(false)}>
                     🛒 Buyer Invoices
                   </Link>
-                  <Link href="/account/seller" className="block py-3 px-4 text-white bg-gray-800 hover:bg-gray-700 rounded-md text-sm font-medium" onClick={() => setMenuOpen(false)}>
+                  <Link href="/account/seller" className={`block ${isActive('/account/seller')} px-3 py-2 rounded-full transition-all duration-200 hover:bg-white/20 hover:backdrop-blur-sm text-sm font-semibold`} onClick={() => setMenuOpen(false)}>
                     💰 Seller Invoices
                   </Link>
-                  <Link href="/my-auctions/invoices" className="block py-3 px-4 text-white bg-gray-800 hover:bg-gray-700 rounded-md text-sm font-medium" onClick={() => setMenuOpen(false)}>
+                  <Link href="/my-auctions/invoices" className={`block ${isActive('/my-auctions/invoices')} px-3 py-2 rounded-full transition-all duration-200 hover:bg-white/20 hover:backdrop-blur-sm text-sm font-semibold`} onClick={() => setMenuOpen(false)}>
                     📊 My Auctions
                   </Link>
-                  <Link href="/sell" className="block py-3 px-4 text-black bg-green-500 hover:bg-green-400 rounded-md text-sm font-bold" onClick={() => setMenuOpen(false)}>
+                  <Link href="/sell" className={`block ${isActive('/sell')} px-4 py-2 bg-green-500/80 hover:bg-green-600 rounded-full transition-all duration-200 hover:scale-105 font-bold shadow-md text-white`} onClick={() => setMenuOpen(false)}>
                     💎 Sell Item
                   </Link>
                 </>
@@ -285,10 +285,10 @@ export default function Header() {
               {/* Admin links */}
               {isAdmin && (
                 <>
-                  <Link href="/admin/inbox" className="block py-3 px-4 text-white bg-red-600 hover:bg-red-500 rounded-md text-sm font-medium" onClick={() => setMenuOpen(false)}>
+                  <Link href="/admin/inbox" className={`block ${isActive('/admin/inbox')} px-3 py-2 rounded-full transition-all duration-200 hover:bg-white/20 hover:backdrop-blur-sm text-sm font-semibold`} onClick={() => setMenuOpen(false)}>
                     🔧 Admin Inbox
                   </Link>
-                  <Link href="/admin/refunds" className="block py-3 px-4 text-white bg-red-600 hover:bg-red-500 rounded-md text-sm font-medium" onClick={() => setMenuOpen(false)}>
+                  <Link href="/admin/refunds" className={`block ${isActive('/admin/refunds')} px-3 py-2 rounded-full transition-all duration-200 hover:bg-white/20 hover:backdrop-blur-sm text-sm font-semibold`} onClick={() => setMenuOpen(false)}>
                     💸 Refunds
                   </Link>
                 </>
@@ -296,16 +296,16 @@ export default function Header() {
 
               {/* Authentication */}
               {!isLoggedIn ? (
-                <div className="pt-2 mt-2 border-t border-gray-700">
-                  <Link href="/login" className="block py-3 px-4 text-black bg-yellow-400 hover:bg-yellow-300 rounded-md text-sm font-bold text-center" onClick={() => setMenuOpen(false)}>
+                <div className="pt-2 mt-2 border-t border-yellow-400/50">
+                  <Link href="/login" className={`block ${isActive('/login')} px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full transition-all duration-200 hover:bg-white/30 hover:scale-105 text-sm font-semibold`} onClick={() => setMenuOpen(false)}>
                     🔐 Login
                   </Link>
-                  <Link href="/register" className="block py-3 px-4 mt-1 text-black bg-yellow-500 hover:bg-yellow-400 rounded-md text-sm font-bold text-center" onClick={() => setMenuOpen(false)}>
+                  <Link href="/register" className={`block ${isActive('/register')} px-4 py-2 bg-white text-yellow-600 rounded-full transition-all duration-200 hover:bg-yellow-50 hover:scale-105 font-bold shadow-md mt-1`} onClick={() => setMenuOpen(false)}>
                     ✨ Register
                   </Link>
                 </div>
               ) : (
-                <div className="pt-2 mt-2 border-t border-gray-700">
+                <div className="pt-2 mt-2 border-t border-yellow-400/50">
                   <button 
                     onClick={() => {
                       localStorage.removeItem('userEmail');
@@ -316,7 +316,7 @@ export default function Header() {
                       setMenuOpen(false);
                       window.location.href = '/';
                     }}
-                    className="w-full py-3 px-4 text-white bg-red-600 hover:bg-red-500 rounded-md text-sm font-medium text-center"
+                    className="w-full px-4 py-2 bg-red-500/80 backdrop-blur-sm rounded-full transition-all duration-200 hover:bg-red-600 hover:scale-105 font-semibold shadow-md text-white"
                   >
                     🚪 Logout
                   </button>
