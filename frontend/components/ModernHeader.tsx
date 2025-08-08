@@ -197,7 +197,7 @@ export default function ModernHeader({
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed top-0 left-0 h-full w-80 bg-black border-r border-green-500/20 z-50 lg:hidden"
+              className="fixed top-0 left-0 h-full w-80 bg-black border-r border-green-500 shadow-2xl z-50 lg:hidden"
             >
               <div className="flex flex-col h-full p-6">
                 {/* Mobile Logo */}
@@ -207,7 +207,7 @@ export default function ModernHeader({
                   </div>
                   <button
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="p-2 text-green-400 hover:text-green-300 hover:bg-green-500/10 rounded-lg transition-all duration-200"
+                    className="p-2 text-green-300 hover:text-green-200 hover:bg-green-500/20 rounded-lg transition-all duration-200"
                   >
                     <XMarkIcon className="w-6 h-6" />
                   </button>
@@ -225,10 +225,10 @@ export default function ModernHeader({
                       <Link
                         href={item.href}
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className={`block py-2.5 px-4 rounded-lg font-inter font-medium transition-all duration-200 ${
+                        className={`block py-3 px-4 rounded-lg font-inter font-bold transition-all duration-200 ${
                           pathname === item.href
-                            ? 'bg-green-500/20 text-green-400 border-l-4 border-green-500 shadow-lg'
-                            : 'text-green-400 hover:bg-green-500/10 hover:text-green-300 hover:shadow-md'
+                            ? 'bg-green-400/30 text-green-300 border-l-4 border-green-400 shadow-lg shadow-green-500/20'
+                            : 'text-green-300 hover:bg-green-500/20 hover:text-green-200 hover:shadow-md'
                         }`}
                       >
                         {item.name}
@@ -239,12 +239,12 @@ export default function ModernHeader({
 
                 {/* Mobile Actions */}
                 <div className="space-y-3 mb-6 flex-shrink-0">
-                  <button className="w-full flex items-center space-x-3 py-2.5 px-4 text-green-400 hover:bg-green-500/10 hover:text-green-300 rounded-lg transition-all duration-200 hover:shadow-md">
+                  <button className="w-full flex items-center space-x-3 py-3 px-4 text-green-300 hover:bg-green-500/20 hover:text-green-200 rounded-lg transition-all duration-200 hover:shadow-md font-bold">
                     <MagnifyingGlassIcon className="w-5 h-5" />
                     <span className="font-inter">Search</span>
                   </button>
                   
-                  <button className="w-full flex items-center space-x-3 py-2.5 px-4 text-green-400 hover:bg-green-500/10 hover:text-green-300 rounded-lg transition-all duration-200 hover:shadow-md">
+                  <button className="w-full flex items-center space-x-3 py-3 px-4 text-green-300 hover:bg-green-500/20 hover:text-green-200 rounded-lg transition-all duration-200 hover:shadow-md font-bold">
                     <BellIcon className="w-5 h-5" />
                     <span className="font-inter">Notifications</span>
                     {notificationCount > 0 && (
@@ -256,7 +256,7 @@ export default function ModernHeader({
                 </div>
 
                 {/* Mobile Auth */}
-                <div className="mt-auto pt-6 border-t border-green-500/20 flex-shrink-0">
+                <div className="mt-auto pt-6 border-t border-green-500 flex-shrink-0">
                   {isLoggedIn ? (
                     <div className="space-y-3">
                       <div className="flex items-center space-x-3 py-2 px-4">
@@ -266,13 +266,13 @@ export default function ModernHeader({
                           </span>
                         </div>
                         <div>
-                          <p className="text-green-400 font-inter font-medium text-sm">{userEmail.split('@')[0]}</p>
-                          <p className="text-green-300 text-xs">{userEmail}</p>
+                          <p className="text-green-300 font-inter font-bold text-sm">{userEmail.split('@')[0]}</p>
+                          <p className="text-green-200 text-xs">{userEmail}</p>
                         </div>
                       </div>
                       <button 
                         onClick={handleLogout}
-                        className="w-full py-2.5 px-4 text-red-400 hover:bg-red-500/20 hover:text-red-300 rounded-lg transition-all duration-200 font-inter text-sm shadow-md"
+                        className="w-full py-3 px-4 text-red-300 hover:bg-red-500/30 hover:text-red-200 rounded-lg transition-all duration-200 font-inter font-bold text-sm shadow-md"
                       >
                         Sign Out
                       </button>
@@ -280,12 +280,12 @@ export default function ModernHeader({
                   ) : (
                     <div className="space-y-3">
                       <Link href="/login" onClick={() => setIsMobileMenuOpen(false)}>
-                        <button className="w-full py-2.5 px-4 text-green-400 border border-green-500/50 rounded-lg hover:border-green-400 hover:text-green-300 hover:bg-green-500/10 transition-all duration-200 font-inter font-medium text-sm shadow-md">
+                        <button className="w-full py-3 px-4 text-green-300 border-2 border-green-400 rounded-lg hover:border-green-300 hover:text-green-200 hover:bg-green-500/20 transition-all duration-200 font-inter font-bold text-sm shadow-md">
                           Login
                         </button>
                       </Link>
                       <Link href="/register" onClick={() => setIsMobileMenuOpen(false)}>
-                        <button className="w-full py-2.5 px-4 bg-green-500 text-black rounded-lg font-inter font-bold hover:bg-green-400 hover:shadow-lg transition-all duration-200 text-sm shadow-md">
+                        <button className="w-full py-3 px-4 bg-green-400 text-black rounded-lg font-inter font-bold hover:bg-green-300 hover:shadow-xl transition-all duration-200 text-sm shadow-md">
                           Sign Up
                         </button>
                       </Link>
