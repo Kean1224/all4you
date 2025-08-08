@@ -244,39 +244,39 @@ export default function Header() {
 
         {/* MOBILE NAV */}
         {menuOpen && (
-          <div className="md:hidden fixed top-0 left-0 w-full h-full bg-white z-50 shadow-2xl border-b border-gray-300 flex flex-col items-center justify-start pt-20 pb-8 px-4">
-            <div className="w-full max-w-md mx-auto space-y-4">
+          <div className="md:hidden fixed top-0 left-0 w-full h-full bg-black bg-opacity-95 z-50 shadow-2xl flex flex-col items-start justify-start pt-20 pb-8 px-0 overflow-y-auto">
+            <div className="w-full space-y-4 px-4">
               
               {/* General Links */}
-              <Link href="/terms" className="block px-4 py-3 bg-gray-800 text-white rounded-lg transition-all duration-200 hover:bg-gray-700 text-base font-semibold border border-gray-600" onClick={() => setMenuOpen(false)}>
+              <Link href="/terms" className="block w-full px-4 py-4 bg-gray-900 text-white rounded-lg transition-all duration-200 hover:bg-gray-700 text-lg font-bold border border-gray-700" onClick={() => setMenuOpen(false)}>
                 📋 Terms
               </Link>
-              <Link href="/contact" className="block px-4 py-3 bg-gray-800 text-white rounded-lg transition-all duration-200 hover:bg-gray-700 text-base font-semibold border border-gray-600" onClick={() => setMenuOpen(false)}>
+              <Link href="/contact" className="block w-full px-4 py-4 bg-gray-900 text-white rounded-lg transition-all duration-200 hover:bg-gray-700 text-lg font-bold border border-gray-700" onClick={() => setMenuOpen(false)}>
                 📞 Contact
               </Link>
               
               {/* User-only links */}
               {isLoggedIn && (
                 <>
-                  <Link href="/auctions" className="block px-4 py-3 bg-gray-100 text-gray-900 rounded-xl transition-all duration-200 hover:bg-yellow-200 text-lg font-bold shadow border border-gray-300" onClick={() => setMenuOpen(false)}>
+                  <Link href="/auctions" className="block w-full px-4 py-4 bg-yellow-600 text-white rounded-xl transition-all duration-200 hover:bg-yellow-700 text-lg font-bold shadow border-2 border-yellow-400" onClick={() => setMenuOpen(false)}>
                     🏛️ Auctions
                   </Link>
-                  <Link href="/auctions/past" className="block px-4 py-3 bg-gray-100 text-gray-900 rounded-xl transition-all duration-200 hover:bg-yellow-200 text-lg font-bold shadow border border-gray-300" onClick={() => setMenuOpen(false)}>
+                  <Link href="/auctions/past" className="block w-full px-4 py-4 bg-yellow-500 text-white rounded-xl transition-all duration-200 hover:bg-yellow-600 text-lg font-bold shadow border-2 border-yellow-400" onClick={() => setMenuOpen(false)}>
                     📜 Past Auctions
                   </Link>
-                  <Link href="/watchlist" className="block px-4 py-3 bg-gray-100 text-gray-900 rounded-xl transition-all duration-200 hover:bg-yellow-200 text-lg font-bold shadow border border-gray-300" onClick={() => setMenuOpen(false)}>
+                  <Link href="/watchlist" className="block w-full px-4 py-4 bg-pink-600 text-white rounded-xl transition-all duration-200 hover:bg-pink-700 text-lg font-bold shadow border-2 border-pink-400" onClick={() => setMenuOpen(false)}>
                     ❤️ Watchlist
                   </Link>
-                  <Link href="/account/buyer" className="block px-4 py-3 bg-blue-100 text-blue-900 rounded-xl transition-all duration-200 hover:bg-blue-200 text-lg font-bold shadow border border-blue-200" onClick={() => setMenuOpen(false)}>
+                  <Link href="/account/buyer" className="block w-full px-4 py-4 bg-blue-700 text-white rounded-xl transition-all duration-200 hover:bg-blue-800 text-lg font-bold shadow border-2 border-blue-400" onClick={() => setMenuOpen(false)}>
                     🛒 Buyer Invoices
                   </Link>
-                  <Link href="/account/seller" className="block px-4 py-3 bg-blue-100 text-blue-900 rounded-xl transition-all duration-200 hover:bg-blue-200 text-lg font-bold shadow border border-blue-200" onClick={() => setMenuOpen(false)}>
+                  <Link href="/account/seller" className="block w-full px-4 py-4 bg-blue-700 text-white rounded-xl transition-all duration-200 hover:bg-blue-800 text-lg font-bold shadow border-2 border-blue-400" onClick={() => setMenuOpen(false)}>
                     💰 Seller Invoices
                   </Link>
-                  <Link href="/my-auctions/invoices" className="block px-4 py-3 bg-gray-100 text-gray-900 rounded-xl transition-all duration-200 hover:bg-yellow-200 text-lg font-bold shadow border border-gray-300" onClick={() => setMenuOpen(false)}>
+                  <Link href="/my-auctions/invoices" className="block w-full px-4 py-4 bg-gray-800 text-white rounded-xl transition-all duration-200 hover:bg-gray-900 text-lg font-bold shadow border-2 border-gray-700" onClick={() => setMenuOpen(false)}>
                     📊 My Auctions
                   </Link>
-                  <Link href="/sell" className="block px-4 py-3 bg-green-500 text-white rounded-xl transition-all duration-200 hover:bg-green-600 font-bold shadow-lg border-2 border-green-400 text-lg" onClick={() => setMenuOpen(false)}>
+                  <Link href="/sell" className="block w-full px-4 py-4 bg-green-600 text-white rounded-xl transition-all duration-200 hover:bg-green-700 font-bold shadow-lg border-2 border-green-400 text-lg" onClick={() => setMenuOpen(false)}>
                     💎 Sell Item
                   </Link>
                 </>
@@ -285,10 +285,10 @@ export default function Header() {
               {/* Admin links */}
               {isAdmin && (
                 <>
-                  <Link href="/admin/inbox" className="block px-4 py-3 bg-red-600 text-white rounded-lg transition-all duration-200 hover:bg-red-700 text-base font-semibold border border-red-500" onClick={() => setMenuOpen(false)}>
+                  <Link href="/admin/inbox" className="block w-full px-4 py-4 bg-red-700 text-white rounded-lg transition-all duration-200 hover:bg-red-800 text-lg font-bold border-2 border-red-500" onClick={() => setMenuOpen(false)}>
                     🔧 Admin Inbox
                   </Link>
-                  <Link href="/admin/refunds" className="block px-4 py-3 bg-orange-600 text-white rounded-lg transition-all duration-200 hover:bg-orange-700 text-base font-semibold border border-orange-500" onClick={() => setMenuOpen(false)}>
+                  <Link href="/admin/refunds" className="block w-full px-4 py-4 bg-orange-700 text-white rounded-lg transition-all duration-200 hover:bg-orange-800 text-lg font-bold border-2 border-orange-500" onClick={() => setMenuOpen(false)}>
                     💸 Refunds
                   </Link>
                 </>
@@ -296,11 +296,11 @@ export default function Header() {
 
               {/* Authentication */}
               {!isLoggedIn ? (
-                <div className="pt-3 mt-3 border-t border-gray-600">
-                  <Link href="/login" className="block px-4 py-3 bg-yellow-600 text-white rounded-lg transition-all duration-200 hover:bg-yellow-700 text-base font-bold border border-yellow-500 text-center mb-2" onClick={() => setMenuOpen(false)}>
+                <div className="pt-3 mt-3 border-t border-gray-600 w-full">
+                  <Link href="/login" className="block w-full px-4 py-4 bg-yellow-700 text-white rounded-lg transition-all duration-200 hover:bg-yellow-800 text-lg font-bold border-2 border-yellow-600 text-center mb-2" onClick={() => setMenuOpen(false)}>
                     🔐 Login
                   </Link>
-                  <Link href="/register" className="block px-4 py-3 bg-yellow-500 text-white rounded-lg transition-all duration-200 hover:bg-yellow-600 font-bold border border-yellow-400 text-center" onClick={() => setMenuOpen(false)}>
+                  <Link href="/register" className="block w-full px-4 py-4 bg-yellow-600 text-white rounded-lg transition-all duration-200 hover:bg-yellow-700 text-lg font-bold border-2 border-yellow-500 text-center" onClick={() => setMenuOpen(false)}>
                     ✨ Register
                   </Link>
                 </div>
