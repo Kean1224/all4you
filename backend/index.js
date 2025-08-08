@@ -56,15 +56,13 @@ app.get('/health', (req, res) => {
   res.json({ status: 'healthy', timestamp: new Date().toISOString() });
 });
 
-// Start WebSocket server for notifications
+// Start WebSocket server for notifications (integrated with main server)
+let wsServer;
 try {
-  const { server: wsServer } = require('./ws-server');
-  const wsPort = process.env.WS_PORT || 5051;
-  wsServer.listen(wsPort, () => {
-    console.log(`WebSocket server running on port ${wsPort}`);
-  });
+  wsServer = require('./ws-server');
+  console.log('✅ WebSocket server module loaded and ready');
 } catch (e) {
-  console.error('WebSocket server failed to start:', e);
+  console.error('WebSocket server failed to load:', e);
 }
 
 // Middleware - Static file serving with CORS headers
@@ -145,10 +143,23 @@ app.use('/api/system', systemStatusRouter);
 const refundsRouter = require('./api/refunds/index');
 app.use('/api/refunds', refundsRouter);
 
-// Start the main Express server
-app.listen(PORT, () => {
+// Start the main Express server with WebSocket integration
+const server = app.listen(PORT, () => {
   console.log(`Backend server running on port ${PORT}`);
   console.log(`✅ Registration system with FICA uploads: ENABLED`);
+  
+  // Initialize WebSocket server on the same port as Express
+  if (wsServer && wsServer.createWebSocketServer) {
+    try {
+      const wsInstance = wsServer.createWebSocketServer(server);
+      console.log(`🚀 WebSocket server integrated on port ${PORT}`);
+      console.log('✅ Real-time bidding system ready');
+    } catch (e) {
+      console.error('Failed to start WebSocket server:', e);
+    }
+  } else {
+    console.warn('⚠️  WebSocket server not available');
+  }
   console.log(`✅ User management system: ENABLED`);
   console.log(`✅ Email verification system: ENABLED`);
 });
