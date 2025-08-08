@@ -66,7 +66,7 @@ export default function ContactPage() {
             </Link>
           </motion.div>
 
-          <div className="grid lg:grid-cols-2 gap-12">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
             {/* Contact Information */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}

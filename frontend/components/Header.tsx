@@ -235,7 +235,7 @@ export default function Header() {
 
           {/* HAMBURGER */}
           <button
-            className="md:hidden text-white text-2xl focus:outline-none transition-all duration-200 hover:scale-110 hover:bg-white/20 rounded-full p-2"
+            className="md:hidden text-white text-2xl focus:outline-none transition-all duration-200 hover:scale-110 hover:bg-white/20 rounded-full p-3 border-2 border-white/30 bg-black/20 backdrop-blur-sm"
             onClick={() => setMenuOpen(!menuOpen)}
           >
             {menuOpen ? '✕' : '☰'}
@@ -244,39 +244,39 @@ export default function Header() {
 
         {/* MOBILE NAV */}
         {menuOpen && (
-          <div className="md:hidden bg-gradient-to-r from-yellow-500 via-yellow-600 to-orange-500 shadow-2xl">
-            <div className="py-2 px-4 space-y-1">
+          <div className="md:hidden bg-black shadow-2xl border-t-2 border-yellow-400">
+            <div className="py-3 px-4 space-y-3">
               
               {/* General Links */}
-              <Link href="/terms" className={`block ${isActive('/terms')} px-3 py-2 rounded-full bg-white text-gray-900 transition-all duration-200 hover:bg-yellow-100 text-base font-bold shadow`} onClick={() => setMenuOpen(false)}>
+              <Link href="/terms" className="block px-4 py-3 bg-gray-800 text-white rounded-lg transition-all duration-200 hover:bg-gray-700 text-base font-semibold border border-gray-600" onClick={() => setMenuOpen(false)}>
                 📋 Terms
               </Link>
-              <Link href="/contact" className={`block ${isActive('/contact')} px-3 py-2 rounded-full bg-white text-gray-900 transition-all duration-200 hover:bg-yellow-100 text-base font-bold shadow`} onClick={() => setMenuOpen(false)}>
+              <Link href="/contact" className="block px-4 py-3 bg-gray-800 text-white rounded-lg transition-all duration-200 hover:bg-gray-700 text-base font-semibold border border-gray-600" onClick={() => setMenuOpen(false)}>
                 📞 Contact
               </Link>
               
               {/* User-only links */}
               {isLoggedIn && (
                 <>
-                  <Link href="/auctions" className={`block ${isActive('/auctions')} px-3 py-2 rounded-full bg-white text-gray-900 transition-all duration-200 hover:bg-yellow-100 text-base font-bold shadow`} onClick={() => setMenuOpen(false)}>
+                  <Link href="/auctions" className="block px-4 py-3 bg-blue-600 text-white rounded-lg transition-all duration-200 hover:bg-blue-700 text-base font-semibold border border-blue-500" onClick={() => setMenuOpen(false)}>
                     🏛️ Auctions
                   </Link>
-                  <Link href="/auctions/past" className={`block ${isActive('/auctions/past')} px-3 py-2 rounded-full bg-white text-gray-900 transition-all duration-200 hover:bg-yellow-100 text-base font-bold shadow`} onClick={() => setMenuOpen(false)}>
+                  <Link href="/auctions/past" className="block px-4 py-3 bg-purple-600 text-white rounded-lg transition-all duration-200 hover:bg-purple-700 text-base font-semibold border border-purple-500" onClick={() => setMenuOpen(false)}>
                     📜 Past Auctions
                   </Link>
-                  <Link href="/watchlist" className={`block ${isActive('/watchlist')} px-3 py-2 rounded-full bg-white text-gray-900 transition-all duration-200 hover:bg-yellow-100 text-base font-bold shadow`} onClick={() => setMenuOpen(false)}>
+                  <Link href="/watchlist" className="block px-4 py-3 bg-pink-600 text-white rounded-lg transition-all duration-200 hover:bg-pink-700 text-base font-semibold border border-pink-500" onClick={() => setMenuOpen(false)}>
                     ❤️ Watchlist
                   </Link>
-                  <Link href="/account/buyer" className={`block ${isActive('/account/buyer')} px-3 py-2 rounded-full bg-white text-gray-900 transition-all duration-200 hover:bg-blue-100 text-base font-bold shadow`} onClick={() => setMenuOpen(false)}>
+                  <Link href="/account/buyer" className="block px-4 py-3 bg-indigo-600 text-white rounded-lg transition-all duration-200 hover:bg-indigo-700 text-base font-semibold border border-indigo-500" onClick={() => setMenuOpen(false)}>
                     🛒 Buyer Invoices
                   </Link>
-                  <Link href="/account/seller" className={`block ${isActive('/account/seller')} px-3 py-2 rounded-full bg-white text-gray-900 transition-all duration-200 hover:bg-blue-100 text-base font-bold shadow`} onClick={() => setMenuOpen(false)}>
+                  <Link href="/account/seller" className="block px-4 py-3 bg-teal-600 text-white rounded-lg transition-all duration-200 hover:bg-teal-700 text-base font-semibold border border-teal-500" onClick={() => setMenuOpen(false)}>
                     💰 Seller Invoices
                   </Link>
-                  <Link href="/my-auctions/invoices" className={`block ${isActive('/my-auctions/invoices')} px-3 py-2 rounded-full bg-white text-gray-900 transition-all duration-200 hover:bg-yellow-100 text-base font-bold shadow`} onClick={() => setMenuOpen(false)}>
+                  <Link href="/my-auctions/invoices" className="block px-4 py-3 bg-cyan-600 text-white rounded-lg transition-all duration-200 hover:bg-cyan-700 text-base font-semibold border border-cyan-500" onClick={() => setMenuOpen(false)}>
                     📊 My Auctions
                   </Link>
-                  <Link href="/sell" className={`block ${isActive('/sell')} px-4 py-2 bg-green-500 hover:bg-green-600 rounded-full transition-all duration-200 hover:scale-105 font-bold shadow-md text-white`} onClick={() => setMenuOpen(false)}>
+                  <Link href="/sell" className="block px-4 py-3 bg-green-600 text-white rounded-lg transition-all duration-200 hover:bg-green-700 text-base font-bold border-2 border-green-500 shadow-lg" onClick={() => setMenuOpen(false)}>
                     💎 Sell Item
                   </Link>
                 </>
@@ -285,10 +285,10 @@ export default function Header() {
               {/* Admin links */}
               {isAdmin && (
                 <>
-                  <Link href="/admin/inbox" className={`block ${isActive('/admin/inbox')} px-3 py-2 rounded-full bg-white text-gray-900 transition-all duration-200 hover:bg-red-100 text-base font-bold shadow`} onClick={() => setMenuOpen(false)}>
+                  <Link href="/admin/inbox" className="block px-4 py-3 bg-red-600 text-white rounded-lg transition-all duration-200 hover:bg-red-700 text-base font-semibold border border-red-500" onClick={() => setMenuOpen(false)}>
                     🔧 Admin Inbox
                   </Link>
-                  <Link href="/admin/refunds" className={`block ${isActive('/admin/refunds')} px-3 py-2 rounded-full bg-white text-gray-900 transition-all duration-200 hover:bg-red-100 text-base font-bold shadow`} onClick={() => setMenuOpen(false)}>
+                  <Link href="/admin/refunds" className="block px-4 py-3 bg-orange-600 text-white rounded-lg transition-all duration-200 hover:bg-orange-700 text-base font-semibold border border-orange-500" onClick={() => setMenuOpen(false)}>
                     💸 Refunds
                   </Link>
                 </>
@@ -296,16 +296,16 @@ export default function Header() {
 
               {/* Authentication */}
               {!isLoggedIn ? (
-                <div className="pt-2 mt-2 border-t border-yellow-400/50">
-                  <Link href="/login" className={`block ${isActive('/login')} px-4 py-2 bg-white text-gray-900 rounded-full transition-all duration-200 hover:bg-yellow-100 text-base font-bold shadow`} onClick={() => setMenuOpen(false)}>
+                <div className="pt-3 mt-3 border-t border-gray-600">
+                  <Link href="/login" className="block px-4 py-3 bg-yellow-600 text-white rounded-lg transition-all duration-200 hover:bg-yellow-700 text-base font-bold border border-yellow-500 text-center mb-2" onClick={() => setMenuOpen(false)}>
                     🔐 Login
                   </Link>
-                  <Link href="/register" className={`block ${isActive('/register')} px-4 py-2 bg-white text-yellow-700 rounded-full transition-all duration-200 hover:bg-yellow-200 font-bold shadow mt-1`} onClick={() => setMenuOpen(false)}>
+                  <Link href="/register" className="block px-4 py-3 bg-yellow-500 text-white rounded-lg transition-all duration-200 hover:bg-yellow-600 font-bold border border-yellow-400 text-center" onClick={() => setMenuOpen(false)}>
                     ✨ Register
                   </Link>
                 </div>
               ) : (
-                <div className="pt-2 mt-2 border-t border-yellow-400/50">
+                <div className="pt-3 mt-3 border-t border-gray-600">
                   <button 
                     onClick={() => {
                       localStorage.removeItem('userEmail');
@@ -316,7 +316,7 @@ export default function Header() {
                       setMenuOpen(false);
                       window.location.href = '/';
                     }}
-                    className="w-full px-4 py-2 bg-red-600 text-white rounded-full transition-all duration-200 hover:bg-red-700 font-bold shadow"
+                    className="w-full px-4 py-3 bg-red-700 text-white rounded-lg transition-all duration-200 hover:bg-red-800 font-bold border border-red-600 text-center"
                   >
                     🚪 Logout
                   </button>
