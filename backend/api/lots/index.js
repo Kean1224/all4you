@@ -376,26 +376,59 @@ router.get('/:auctionId/:lotId/autobid/:userEmail', authenticateToken, (req, res
   res.json({ maxBid: autoBid?.maxBid || null });
 });
 
-// ✅ Place a bid using increment, and process auto-bids (protected)
-router.put('/:auctionId/:lotId/bid', authenticateToken, async (req, res) => {
-  const { auctionId, lotId } = req.params;
-  const { bidderEmail } = req.body;
+// ✅ Place a bid using increment, and process auto-bids
+router.post('/:lotId/bid', async (req, res) => {
+  const { lotId } = req.params;
+  const { bidderEmail, amount, increment } = req.body;
+
+  console.log('🎯 Bid request received:', { lotId, bidderEmail, amount, increment });
 
   const auctions = readAuctions();
-  const auction = auctions.find(a => a.id === auctionId);
-  if (!auction) return res.status(404).json({ error: 'Auction not found' });
+  
+  // Find auction that contains this lot
+  let auction = null;
+  let lot = null;
+  
+  for (const auc of auctions) {
+    const foundLot = (auc.lots || []).find(l => l.id === lotId);
+    if (foundLot) {
+      auction = auc;
+      lot = foundLot;
+      break;
+    }
+  }
+  
+  if (!auction || !lot) {
+    return res.status(404).json({ success: false, error: 'Lot not found in any auction' });
+  }
 
-  const lot = auction.lots.find(l => l.id === lotId);
-  if (!lot) return res.status(404).json({ error: 'Lot not found' });
+  const auctionId = auction.id;
+
+  // Check if lot has ended
+  if (lot.endTime && new Date().getTime() >= new Date(lot.endTime).getTime()) {
+    return res.status(400).json({ success: false, error: 'This lot has already ended' });
+  }
 
   // Check if user is trying to bid against themselves
   let previousBidder = lot.bidHistory && lot.bidHistory.length > 0 ? lot.bidHistory[lot.bidHistory.length - 1].bidderEmail : null;
   if (previousBidder === bidderEmail) {
-    return res.status(400).json({ error: 'You are already the highest bidder' });
+    return res.status(400).json({ success: false, error: 'You are already the highest bidder' });
   }
 
-  const increment = lot.bidIncrement || 10;
-  let newBid = lot.currentBid + increment;
+  // Use the bid increment from the request, or fall back to lot's default increment
+  const bidIncrement = increment || lot.bidIncrement || 10;
+  
+  // Validate that the proposed bid meets the minimum increment requirement
+  const expectedMinBid = lot.currentBid + bidIncrement;
+  if (amount && amount < expectedMinBid) {
+    return res.status(400).json({ 
+      success: false, 
+      error: `Minimum bid is R${expectedMinBid.toLocaleString()}` 
+    });
+  }
+
+  // Use the amount provided, or calculate based on current bid + increment
+  let newBid = amount || (lot.currentBid + bidIncrement);
   let lastBidder = bidderEmail || 'unknown';
 
   lot.currentBid = newBid;
@@ -414,8 +447,8 @@ router.put('/:auctionId/:lotId/bid', authenticateToken, async (req, res) => {
       bidAmount: newBid,
       lotTitle: lot.title,
       timestamp: new Date().toISOString(),
-      bidIncrement: increment,
-      nextMinBid: lot.currentBid + increment
+      bidIncrement: bidIncrement,
+      nextMinBid: lot.currentBid + bidIncrement
     });
   }
 
@@ -466,7 +499,7 @@ router.put('/:auctionId/:lotId/bid', authenticateToken, async (req, res) => {
     autobidTriggered = false;
     // Find all auto-bidders who can outbid current and are not the current highest bidder
     const eligible = lot.autoBids.filter(b => 
-      b.maxBid >= lot.currentBid + increment && 
+      b.maxBid >= lot.currentBid + bidIncrement && 
       b.bidderEmail !== lastBidder
     );
     
@@ -476,7 +509,7 @@ router.put('/:auctionId/:lotId/bid', authenticateToken, async (req, res) => {
       const winner = eligible[0];
       
       // Calculate new bid - only increment by the minimum needed
-      newBid = Math.min(winner.maxBid, lot.currentBid + increment);
+      newBid = Math.min(winner.maxBid, lot.currentBid + bidIncrement);
       
       // Only proceed if the auto-bidder's max is high enough
       if (newBid <= winner.maxBid) {
@@ -537,7 +570,7 @@ router.put('/:auctionId/:lotId/bid', authenticateToken, async (req, res) => {
             lotTitle: lot.title,
             timestamp: new Date().toISOString(),
             bidIncrement: increment,
-            nextMinBid: lot.currentBid + increment,
+            nextMinBid: lot.currentBid + bidIncrement,
             isAutoBid: true,
             autoBidder: winner.bidderEmail.substring(0, 3) + '***'
           });
@@ -552,7 +585,7 @@ router.put('/:auctionId/:lotId/bid', authenticateToken, async (req, res) => {
         
         // Continue if there are more eligible auto-bidders
         const stillEligible = lot.autoBids.filter(b => 
-          b.maxBid >= lot.currentBid + increment && 
+          b.maxBid >= lot.currentBid + bidIncrement && 
           b.bidderEmail !== lastBidder
         );
         autobidTriggered = stillEligible.length > 0;
@@ -604,7 +637,7 @@ router.put('/:auctionId/:lotId/bid', authenticateToken, async (req, res) => {
         lotId: lotId,
         bidAmount: lot.currentBid,
         timeRemaining: auction ? calculateTimeRemaining(auction.endTime) : null,
-        nextMinBid: lot.currentBid + increment,
+        nextMinBid: lot.currentBid + bidIncrement,
         wasExtended: currentTime >= auctionEndTime - fiveMinutesInMs && currentTime < auctionEndTime
       });
     }
@@ -612,7 +645,13 @@ router.put('/:auctionId/:lotId/bid', authenticateToken, async (req, res) => {
     console.error('Failed to send bid confirmation email:', e.message);
   }
   
-  res.json({ message: 'Bid placed successfully', currentBid: lot.currentBid });
+  res.json({ 
+    success: true,
+    message: 'Bid placed successfully', 
+    currentBid: lot.currentBid,
+    bidHistory: lot.bidHistory,
+    newBidAmount: newBid 
+  });
 });
 
 module.exports = router;
