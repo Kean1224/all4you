@@ -19,10 +19,37 @@ module.exports = (req, res) => {
     (admin) => admin.email === email && admin.password === password
   );
   if (isValid) {
-    // Issue JWT
-    const token = jwt.sign({ email, role: 'admin' }, SECRET, { expiresIn: '2h' });
-    return res.json({ token });
+    // Security logging
+    const clientIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.ip;
+    console.log(`[SECURITY] ${new Date().toISOString()}: ADMIN_LOGIN_SUCCESS`, {
+      email,
+      ip: clientIP,
+      userAgent: req.headers['user-agent']
+    });
+
+    // Issue JWT with issued at timestamp
+    const issuedAt = Math.floor(Date.now() / 1000);
+    const token = jwt.sign({ 
+      email, 
+      role: 'admin',
+      iat: issuedAt
+    }, SECRET, { expiresIn: '4h' });
+    
+    return res.json({ 
+      token, 
+      email,
+      expiresAt: issuedAt + (4 * 60 * 60), // 4 hours from now
+      message: 'Admin login successful'
+    });
   } else {
+    // Security logging for failed attempts
+    const clientIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.ip;
+    console.log(`[SECURITY] ${new Date().toISOString()}: ADMIN_LOGIN_FAILED`, {
+      email: email || 'unknown',
+      ip: clientIP,
+      userAgent: req.headers['user-agent']
+    });
+    
     return res.status(401).json({ error: 'Invalid credentials' });
   }
 };
