@@ -245,18 +245,18 @@ export default function Header() {
 
         {/* MOBILE NAV */}
         {menuOpen && (
-          <div className="md:hidden px-4 pb-6 bg-gradient-to-b from-yellow-500 to-orange-500 text-white text-base font-semibold transition-all rounded-b-2xl shadow-2xl border-t border-yellow-400/50 max-h-[80vh] overflow-y-auto">
+          <div className="md:hidden px-3 pb-4 bg-gradient-to-b from-yellow-500 to-orange-500 text-white text-sm font-semibold transition-all rounded-b-2xl shadow-2xl border-t border-yellow-400/50">
             
-            <div className="flex flex-col gap-1 pt-4">
+            <div className="flex flex-col gap-1 pt-3">
               
               {/* General Navigation Section */}
-              <div className="bg-white/10 rounded-xl p-3 mb-2 border border-white/20">
-                <p className="font-bold text-white mb-2 text-center text-sm opacity-80">📍 General</p>
-                <div className="flex flex-col gap-1">
-                  <Link href="/terms" className={`${isActive('/terms')} py-2 px-3 rounded-lg hover:bg-white/20 transition-all duration-200 flex items-center gap-3`} onClick={() => setMenuOpen(false)}>
+              <div className="bg-white/10 rounded-lg p-2 mb-1 border border-white/20">
+                <p className="font-bold text-white mb-1 text-center text-xs opacity-80">📍 General</p>
+                <div className="flex flex-col gap-0.5">
+                  <Link href="/terms" className={`${isActive('/terms')} py-1.5 px-2 rounded-md hover:bg-white/20 transition-all duration-200 flex items-center gap-2 text-xs`} onClick={() => setMenuOpen(false)}>
                     📋 <span>Terms</span>
                   </Link>
-                  <Link href="/contact" className={`${isActive('/contact')} py-2 px-3 rounded-lg hover:bg-white/20 transition-all duration-200 flex items-center gap-3`} onClick={() => setMenuOpen(false)}>
+                  <Link href="/contact" className={`${isActive('/contact')} py-1.5 px-2 rounded-md hover:bg-white/20 transition-all duration-200 flex items-center gap-2 text-xs`} onClick={() => setMenuOpen(false)}>
                     📞 <span>Contact</span>
                   </Link>
                 </div>
@@ -265,39 +265,39 @@ export default function Header() {
               {/* Auction Navigation Section - Show only for logged-in users */}
               {isLoggedIn && (
                 <>
-                  <div className="bg-yellow-600/30 rounded-xl p-3 mb-2 border border-yellow-400/40">
-                    <p className="font-bold text-white mb-2 text-center text-sm opacity-80">🏛️ Auctions</p>
-                    <div className="flex flex-col gap-1">
-                      <Link href="/auctions" className={`${isActive('/auctions')} py-2 px-3 rounded-lg hover:bg-yellow-400/30 transition-all duration-200 flex items-center gap-3`} onClick={() => setMenuOpen(false)}>
+                  <div className="bg-yellow-600/30 rounded-lg p-2 mb-1 border border-yellow-400/40">
+                    <p className="font-bold text-white mb-1 text-center text-xs opacity-80">🏛️ Auctions</p>
+                    <div className="flex flex-col gap-0.5">
+                      <Link href="/auctions" className={`${isActive('/auctions')} py-1.5 px-2 rounded-md hover:bg-yellow-400/30 transition-all duration-200 flex items-center gap-2 text-xs`} onClick={() => setMenuOpen(false)}>
                         🏛️ <span>Current Auctions</span>
                       </Link>
-                      <Link href="/auctions/past" className={`${isActive('/auctions/past')} py-2 px-3 rounded-lg hover:bg-yellow-400/30 transition-all duration-200 flex items-center gap-3`} onClick={() => setMenuOpen(false)}>
+                      <Link href="/auctions/past" className={`${isActive('/auctions/past')} py-1.5 px-2 rounded-md hover:bg-yellow-400/30 transition-all duration-200 flex items-center gap-2 text-xs`} onClick={() => setMenuOpen(false)}>
                         📜 <span>Past Auctions</span>
                       </Link>
-                      <Link href="/watchlist" className={`${isActive('/watchlist')} py-2 px-3 rounded-lg hover:bg-yellow-400/30 transition-all duration-200 flex items-center gap-3`} onClick={() => setMenuOpen(false)}>
+                      <Link href="/watchlist" className={`${isActive('/watchlist')} py-1.5 px-2 rounded-md hover:bg-yellow-400/30 transition-all duration-200 flex items-center gap-2 text-xs`} onClick={() => setMenuOpen(false)}>
                         ❤️ <span>Watchlist</span>
                       </Link>
                     </div>
                   </div>
                   
-                  <div className="bg-blue-500/20 rounded-xl p-3 my-2 border border-blue-400/30">
-                    <p className="font-bold text-white mb-2 text-center text-sm opacity-80">📄 My Invoices</p>
-                    <div className="flex flex-col gap-1">
-                      <Link href="/account/buyer" className="py-2 px-3 rounded-lg hover:bg-blue-400/30 transition-all duration-200 flex items-center gap-3" onClick={() => setMenuOpen(false)}>
+                  <div className="bg-blue-500/20 rounded-lg p-2 mb-1 border border-blue-400/30">
+                    <p className="font-bold text-white mb-1 text-center text-xs opacity-80">📄 My Invoices</p>
+                    <div className="flex flex-col gap-0.5">
+                      <Link href="/account/buyer" className="py-1.5 px-2 rounded-md hover:bg-blue-400/30 transition-all duration-200 flex items-center gap-2 text-xs" onClick={() => setMenuOpen(false)}>
                         🛒 <span>Buyer Invoices</span>
                       </Link>
-                      <Link href="/account/seller" className="py-2 px-3 rounded-lg hover:bg-blue-400/30 transition-all duration-200 flex items-center gap-3" onClick={() => setMenuOpen(false)}>
+                      <Link href="/account/seller" className="py-1.5 px-2 rounded-md hover:bg-blue-400/30 transition-all duration-200 flex items-center gap-2 text-xs" onClick={() => setMenuOpen(false)}>
                         💰 <span>Seller Invoices</span>
                       </Link>
                     </div>
                   </div>
                   
-                  <Link href="/my-auctions/invoices" className={`${isActive('/my-auctions/invoices')} py-3 px-4 rounded-xl hover:bg-white/20 transition-all duration-200 flex items-center gap-3`} onClick={() => setMenuOpen(false)}>
+                  <Link href="/my-auctions/invoices" className={`${isActive('/my-auctions/invoices')} py-2 px-3 rounded-lg hover:bg-white/20 transition-all duration-200 flex items-center gap-2 text-xs`} onClick={() => setMenuOpen(false)}>
                     📊 <span>My Auctions</span>
                   </Link>
                   
                   {/* Sell Item Button - Enhanced prominence */}
-                  <Link href="/sell" className={`${isActive('/sell')} py-3 px-4 bg-green-500/90 hover:bg-green-600 rounded-xl transition-all duration-200 hover:scale-105 font-bold shadow-lg text-white flex items-center gap-3 border-2 border-green-400`} onClick={() => setMenuOpen(false)}>
+                  <Link href="/sell" className={`${isActive('/sell')} py-2 px-3 bg-green-500/90 hover:bg-green-600 rounded-lg transition-all duration-200 font-bold shadow-md text-white flex items-center gap-2 border border-green-400 text-xs`} onClick={() => setMenuOpen(false)}>
                     💎 <span>Sell Item</span>
                   </Link>
                 </>
@@ -305,13 +305,13 @@ export default function Header() {
 
               {/* Admin links - only for admins */}
               {isAdmin && (
-                <div className="bg-red-500/20 rounded-xl p-3 my-2 border border-red-400/30">
-                  <p className="font-bold text-white mb-2 text-center">🔧 Admin Panel</p>
-                  <div className="flex flex-col gap-1">
-                    <Link href="/admin/inbox" className="py-2 px-3 rounded-lg hover:bg-red-400/30 transition-all duration-200 flex items-center gap-3" onClick={() => setMenuOpen(false)}>
+                <div className="bg-red-500/20 rounded-lg p-2 mb-1 border border-red-400/30">
+                  <p className="font-bold text-white mb-1 text-center text-xs">🔧 Admin Panel</p>
+                  <div className="flex flex-col gap-0.5">
+                    <Link href="/admin/inbox" className="py-1.5 px-2 rounded-md hover:bg-red-400/30 transition-all duration-200 flex items-center gap-2 text-xs" onClick={() => setMenuOpen(false)}>
                       🔧 <span>Admin Inbox</span>
                     </Link>
-                    <Link href="/admin/refunds" className="py-2 px-3 rounded-lg hover:bg-red-400/30 transition-all duration-200 flex items-center gap-3" onClick={() => setMenuOpen(false)}>
+                    <Link href="/admin/refunds" className="py-1.5 px-2 rounded-md hover:bg-red-400/30 transition-all duration-200 flex items-center gap-2 text-xs" onClick={() => setMenuOpen(false)}>
                       💸 <span>Refunds</span>
                     </Link>
                   </div>
@@ -320,11 +320,11 @@ export default function Header() {
 
               {/* Authentication links */}
               {!isLoggedIn ? (
-                <div className="border-t border-white/20 pt-4 mt-4 flex flex-col gap-2">
-                  <Link href="/login" className={`${isActive('/login')} py-3 px-4 bg-white/20 backdrop-blur-sm rounded-xl transition-all duration-200 hover:bg-white/30 flex items-center gap-3 justify-center`} onClick={() => setMenuOpen(false)}>
+                <div className="border-t border-white/20 pt-2 mt-2 flex flex-col gap-1">
+                  <Link href="/login" className={`${isActive('/login')} py-2 px-3 bg-white/20 backdrop-blur-sm rounded-lg transition-all duration-200 hover:bg-white/30 flex items-center gap-2 justify-center text-xs`} onClick={() => setMenuOpen(false)}>
                     🔐 <span>Login</span>
                   </Link>
-                  <Link href="/register" className={`${isActive('/register')} py-3 px-4 bg-white text-yellow-600 rounded-xl transition-all duration-200 hover:bg-yellow-50 font-bold shadow-md flex items-center gap-3 justify-center`} onClick={() => setMenuOpen(false)}>
+                  <Link href="/register" className={`${isActive('/register')} py-2 px-3 bg-white text-yellow-600 rounded-lg transition-all duration-200 hover:bg-yellow-50 font-bold shadow-md flex items-center gap-2 justify-center text-xs`} onClick={() => setMenuOpen(false)}>
                     ✨ <span>Register</span>
                   </Link>
                 </div>
@@ -339,7 +339,7 @@ export default function Header() {
                     setMenuOpen(false);
                     window.location.href = '/';
                   }}
-                  className="mt-4 py-3 px-4 bg-red-500/80 backdrop-blur-sm rounded-xl transition-all duration-200 hover:bg-red-600 font-semibold shadow-md flex items-center gap-3 justify-center border-t border-white/20 pt-4"
+                  className="mt-2 py-2 px-3 bg-red-500/80 backdrop-blur-sm rounded-lg transition-all duration-200 hover:bg-red-600 font-semibold shadow-md flex items-center gap-2 justify-center border-t border-white/20 pt-2 text-xs"
                 >
                   🚪 <span>Logout</span>
                 </button>
