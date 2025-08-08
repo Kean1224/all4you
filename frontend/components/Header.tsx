@@ -245,31 +245,43 @@ export default function Header() {
 
         {/* MOBILE NAV */}
         {menuOpen && (
-          <div className="md:hidden px-4 pb-6 bg-gradient-to-b from-yellow-500 to-orange-500 text-white text-base font-semibold transition-all rounded-b-2xl shadow-2xl border-t border-yellow-400/50">
+          <div className="md:hidden px-4 pb-6 bg-gradient-to-b from-yellow-500 to-orange-500 text-white text-base font-semibold transition-all rounded-b-2xl shadow-2xl border-t border-yellow-400/50 max-h-[80vh] overflow-y-auto">
             
             <div className="flex flex-col gap-1 pt-4">
-              <Link href="/terms" className={`${isActive('/terms')} py-3 px-4 rounded-xl hover:bg-white/20 transition-all duration-200 flex items-center gap-3`} onClick={() => setMenuOpen(false)}>
-                📋 <span>Terms</span>
-              </Link>
-              <Link href="/contact" className={`${isActive('/contact')} py-3 px-4 rounded-xl hover:bg-white/20 transition-all duration-200 flex items-center gap-3`} onClick={() => setMenuOpen(false)}>
-                📞 <span>Contact</span>
-              </Link>
               
-              {/* Show these only for logged-in users */}
+              {/* General Navigation Section */}
+              <div className="bg-white/10 rounded-xl p-3 mb-2 border border-white/20">
+                <p className="font-bold text-white mb-2 text-center text-sm opacity-80">📍 General</p>
+                <div className="flex flex-col gap-1">
+                  <Link href="/terms" className={`${isActive('/terms')} py-2 px-3 rounded-lg hover:bg-white/20 transition-all duration-200 flex items-center gap-3`} onClick={() => setMenuOpen(false)}>
+                    📋 <span>Terms</span>
+                  </Link>
+                  <Link href="/contact" className={`${isActive('/contact')} py-2 px-3 rounded-lg hover:bg-white/20 transition-all duration-200 flex items-center gap-3`} onClick={() => setMenuOpen(false)}>
+                    📞 <span>Contact</span>
+                  </Link>
+                </div>
+              </div>
+              
+              {/* Auction Navigation Section - Show only for logged-in users */}
               {isLoggedIn && (
                 <>
-                  <Link href="/auctions" className={`${isActive('/auctions')} py-3 px-4 rounded-xl hover:bg-white/20 transition-all duration-200 flex items-center gap-3`} onClick={() => setMenuOpen(false)}>
-                    🏛️ <span>Auctions</span>
-                  </Link>
-                  <Link href="/auctions/past" className={`${isActive('/auctions/past')} py-3 px-4 rounded-xl hover:bg-white/20 transition-all duration-200 flex items-center gap-3`} onClick={() => setMenuOpen(false)}>
-                    📜 <span>Past Auctions</span>
-                  </Link>
-                  <Link href="/watchlist" className={`${isActive('/watchlist')} py-3 px-4 rounded-xl hover:bg-white/20 transition-all duration-200 flex items-center gap-3`} onClick={() => setMenuOpen(false)}>
-                    ❤️ <span>Watchlist</span>
-                  </Link>
+                  <div className="bg-yellow-600/30 rounded-xl p-3 mb-2 border border-yellow-400/40">
+                    <p className="font-bold text-white mb-2 text-center text-sm opacity-80">🏛️ Auctions</p>
+                    <div className="flex flex-col gap-1">
+                      <Link href="/auctions" className={`${isActive('/auctions')} py-2 px-3 rounded-lg hover:bg-yellow-400/30 transition-all duration-200 flex items-center gap-3`} onClick={() => setMenuOpen(false)}>
+                        🏛️ <span>Current Auctions</span>
+                      </Link>
+                      <Link href="/auctions/past" className={`${isActive('/auctions/past')} py-2 px-3 rounded-lg hover:bg-yellow-400/30 transition-all duration-200 flex items-center gap-3`} onClick={() => setMenuOpen(false)}>
+                        📜 <span>Past Auctions</span>
+                      </Link>
+                      <Link href="/watchlist" className={`${isActive('/watchlist')} py-2 px-3 rounded-lg hover:bg-yellow-400/30 transition-all duration-200 flex items-center gap-3`} onClick={() => setMenuOpen(false)}>
+                        ❤️ <span>Watchlist</span>
+                      </Link>
+                    </div>
+                  </div>
                   
                   <div className="bg-blue-500/20 rounded-xl p-3 my-2 border border-blue-400/30">
-                    <p className="font-bold text-white mb-2 text-center">� My Invoices</p>
+                    <p className="font-bold text-white mb-2 text-center text-sm opacity-80">📄 My Invoices</p>
                     <div className="flex flex-col gap-1">
                       <Link href="/account/buyer" className="py-2 px-3 rounded-lg hover:bg-blue-400/30 transition-all duration-200 flex items-center gap-3" onClick={() => setMenuOpen(false)}>
                         🛒 <span>Buyer Invoices</span>
@@ -293,9 +305,17 @@ export default function Header() {
 
               {/* Admin links - only for admins */}
               {isAdmin && (
-                <Link href="/admin/inbox" className={`${isActive('/admin/inbox')} py-3 px-4 rounded-xl hover:bg-white/20 transition-all duration-200 flex items-center gap-3`} onClick={() => setMenuOpen(false)}>
-                  🔧 <span>Admin Inbox</span>
-                </Link>
+                <div className="bg-red-500/20 rounded-xl p-3 my-2 border border-red-400/30">
+                  <p className="font-bold text-white mb-2 text-center">🔧 Admin Panel</p>
+                  <div className="flex flex-col gap-1">
+                    <Link href="/admin/inbox" className="py-2 px-3 rounded-lg hover:bg-red-400/30 transition-all duration-200 flex items-center gap-3" onClick={() => setMenuOpen(false)}>
+                      🔧 <span>Admin Inbox</span>
+                    </Link>
+                    <Link href="/admin/refunds" className="py-2 px-3 rounded-lg hover:bg-red-400/30 transition-all duration-200 flex items-center gap-3" onClick={() => setMenuOpen(false)}>
+                      💸 <span>Refunds</span>
+                    </Link>
+                  </div>
+                </div>
               )}
 
               {/* Authentication links */}
