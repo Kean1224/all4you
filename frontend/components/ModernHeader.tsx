@@ -197,9 +197,9 @@ export default function ModernHeader({
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed top-0 left-0 h-full w-80 bg-black opacity-100 border-r border-green-500 shadow-2xl z-50 lg:hidden"
+              className="fixed top-0 left-0 h-full w-80 bg-white shadow-2xl z-50 lg:hidden"
             >
-              <div className="flex flex-col h-full p-6 bg-black">
+              <div className="flex flex-col h-full p-6 bg-white">
                 {/* Mobile Logo */}
                 <div className="flex items-center justify-between mb-6">
                   <div className="w-[120px] h-[40px] bg-primary-500 rounded-lg flex items-center justify-center font-sora font-bold text-secondary-800 text-lg">
@@ -207,9 +207,9 @@ export default function ModernHeader({
                   </div>
                   <button
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="p-3 text-green-200 hover:text-green-100 hover:bg-green-500/30 rounded-lg transition-all duration-200"
+                    className="p-3 text-gray-800 hover:bg-gray-100 rounded-lg transition-all duration-200"
                   >
-                    <XMarkIcon className="w-7 h-7" />
+                    <XMarkIcon className="w-8 h-8" />
                   </button>
                 </div>
 
@@ -225,10 +225,10 @@ export default function ModernHeader({
                       <Link
                         href={item.href}
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className={`block py-3 px-4 rounded-lg font-inter font-bold text-lg transition-all duration-200 ${
+                        className={`block py-4 px-4 rounded-lg font-inter font-bold text-xl transition-all duration-200 ${
                           pathname === item.href
-                            ? 'bg-green-400/40 text-green-200 border-l-4 border-green-300 shadow-lg shadow-green-500/30'
-                            : 'text-green-200 hover:bg-green-500/30 hover:text-green-100 hover:shadow-lg'
+                            ? 'bg-blue-500 text-white shadow-lg'
+                            : 'text-gray-800 hover:bg-gray-100 hover:text-blue-600'
                         }`}
                       >
                         {item.name}
@@ -239,12 +239,12 @@ export default function ModernHeader({
 
                 {/* Mobile Actions */}
                 <div className="space-y-3 mb-6 flex-shrink-0">
-                  <button className="w-full flex items-center space-x-3 py-3 px-4 text-green-200 hover:bg-green-500/30 hover:text-green-100 rounded-lg transition-all duration-200 hover:shadow-lg font-bold text-lg">
+                  <button className="w-full flex items-center space-x-3 py-4 px-4 text-gray-800 hover:bg-gray-100 hover:text-blue-600 rounded-lg transition-all duration-200 font-bold text-lg">
                     <MagnifyingGlassIcon className="w-6 h-6" />
                     <span className="font-inter">Search</span>
                   </button>
                   
-                  <button className="w-full flex items-center space-x-3 py-3 px-4 text-green-200 hover:bg-green-500/30 hover:text-green-100 rounded-lg transition-all duration-200 hover:shadow-lg font-bold text-lg">
+                  <button className="w-full flex items-center space-x-3 py-4 px-4 text-gray-800 hover:bg-gray-100 hover:text-blue-600 rounded-lg transition-all duration-200 font-bold text-lg">
                     <BellIcon className="w-6 h-6" />
                     <span className="font-inter">Notifications</span>
                     {notificationCount > 0 && (
@@ -256,7 +256,7 @@ export default function ModernHeader({
                 </div>
 
                 {/* Mobile Auth */}
-                <div className="mt-auto pt-6 border-t border-green-500 flex-shrink-0">
+                <div className="mt-auto pt-6 border-t-2 border-gray-300 flex-shrink-0">
                   {isLoggedIn ? (
                     <div className="space-y-3">
                       <div className="flex items-center space-x-3 py-2 px-4">
@@ -266,13 +266,13 @@ export default function ModernHeader({
                           </span>
                         </div>
                         <div>
-                          <p className="text-green-200 font-inter font-bold text-base">{userEmail.split('@')[0]}</p>
-                          <p className="text-green-100 text-sm">{userEmail}</p>
+                          <p className="text-gray-800 font-inter font-bold text-lg">{userEmail.split('@')[0]}</p>
+                          <p className="text-gray-600 text-base">{userEmail}</p>
                         </div>
                       </div>
                       <button 
                         onClick={handleLogout}
-                        className="w-full py-3 px-4 text-red-200 hover:bg-red-500/40 hover:text-red-100 rounded-lg transition-all duration-200 font-inter font-bold text-base shadow-md"
+                        className="w-full py-4 px-4 bg-red-500 text-white hover:bg-red-600 rounded-lg transition-all duration-200 font-inter font-bold text-lg shadow-md"
                       >
                         Sign Out
                       </button>
@@ -280,12 +280,12 @@ export default function ModernHeader({
                   ) : (
                     <div className="space-y-3">
                       <Link href="/login" onClick={() => setIsMobileMenuOpen(false)}>
-                        <button className="w-full py-4 px-4 text-green-200 border-2 border-green-300 rounded-lg hover:border-green-200 hover:text-green-100 hover:bg-green-500/30 transition-all duration-200 font-inter font-bold text-lg shadow-md">
+                        <button className="w-full py-4 px-4 text-gray-800 border-2 border-gray-800 rounded-lg hover:bg-gray-800 hover:text-white transition-all duration-200 font-inter font-bold text-xl shadow-md">
                           Login
                         </button>
                       </Link>
                       <Link href="/register" onClick={() => setIsMobileMenuOpen(false)}>
-                        <button className="w-full py-4 px-4 bg-green-300 text-black rounded-lg font-inter font-bold hover:bg-green-200 hover:shadow-xl transition-all duration-200 text-lg shadow-md">
+                        <button className="w-full py-4 px-4 bg-blue-500 text-white rounded-lg font-inter font-bold hover:bg-blue-600 hover:shadow-xl transition-all duration-200 text-xl shadow-md">
                           Sign Up
                         </button>
                       </Link>
