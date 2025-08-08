@@ -376,6 +376,7 @@ type Lot = {
   title: string;
   description: string;
   imageUrl?: string;
+  image?: string;
   images?: string[];
   currentBid: number;
   startingPrice?: number;
