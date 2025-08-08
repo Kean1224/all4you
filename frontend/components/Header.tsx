@@ -1,4 +1,3 @@
-﻿
 "use client";
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -280,7 +279,6 @@ export default function Header() {
                     </div>
                   </div>
                   
-                  <div className="bg-blue-500/20 rounded-lg p-2 mb-1 border border-blue-400/30">
                   <div className="bg-blue-50 rounded-lg p-3 mb-2 border border-blue-200">
                     <p className="font-bold text-blue-700 mb-2 text-center text-base">📄 My Invoices</p>
                     <div className="flex flex-col gap-2">
