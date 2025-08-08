@@ -79,7 +79,8 @@ ensureDemoUser();
 // ✅ POST: FICA re-upload (user can re-upload FICA docs if rejected or updating)
 router.post('/fica-reupload/:email', upload.fields([
   { name: 'idDocument', maxCount: 1 },
-  { name: 'proofOfAddress', maxCount: 1 }
+  { name: 'proofOfAddress', maxCount: 1 },
+  { name: 'bankStatement', maxCount: 1 }
 ]), (req, res) => {
   const users = readUsers();
   const email = decodeURIComponent(req.params.email);
@@ -93,55 +94,19 @@ router.post('/fica-reupload/:email', upload.fields([
   if (req.files.proofOfAddress) {
     user.proofOfAddress = req.files.proofOfAddress[0].filename;
   }
-  user.ficaApproved = false; // Reset approval status
+  if (req.files.bankStatement) {
+    user.bankStatement = req.files.bankStatement[0].filename;
+  }
+  
+  // Reset approval status and clear rejection reason
+  user.ficaApproved = false;
+  delete user.rejectionReason;
+  delete user.rejectedAt;
+  user.resubmittedAt = new Date().toISOString();
+  
   writeUsers(users);
   res.json({ message: 'FICA documents re-uploaded. Pending admin review.', user });
 });
-// ✅ POST: FICA re-upload (user can re-upload FICA docs if rejected or updating)
-router.post('/fica-reupload/:email', upload.fields([
-  { name: 'idDocument', maxCount: 1 },
-  { name: 'proofOfAddress', maxCount: 1 }
-]), (req, res) => {
-  const users = readUsers();
-  const email = decodeURIComponent(req.params.email);
-  const user = users.find(u => u.email === email);
-  if (!user) return res.status(404).json({ error: 'User not found' });
-
-  // Overwrite FICA docs if provided
-  if (req.files.idDocument) {
-    user.idDocument = req.files.idDocument[0].filename;
-  }
-  if (req.files.proofOfAddress) {
-    user.proofOfAddress = req.files.proofOfAddress[0].filename;
-  }
-  user.ficaApproved = false; // Reset approval status
-  writeUsers(users);
-  res.json({ message: 'FICA documents re-uploaded. Pending admin review.', user });
-});
-
-// Ensure demo user exists
-function ensureDemoUser() {
-  const users = readUsers();
-  const demoExists = users.some(u => u.email === 'demo@example.com');
-
-  if (!demoExists) {
-    const demoUser = {
-      email: 'demo@example.com',
-      password: 'demo123',
-      name: 'Demo User',
-      ficaApproved: true,
-      suspended: false,
-      registeredAt: new Date().toISOString(),
-      idDocument: 'demo_id.pdf',
-      proofOfAddress: 'demo_proof.pdf',
-      watchlist: []
-    };
-    users.push(demoUser);
-    writeUsers(users);
-    console.log('✅ Demo user added.');
-  }
-}
-ensureDemoUser();
 
 // ✅ GET all users
 router.get('/', (req, res) => {
@@ -278,6 +243,49 @@ router.put('/fica/:email', async (req, res) => {
   }
 
   res.json({ message: 'FICA approved', user });
+});
+
+// ✅ PUT: Reject FICA with reason
+router.put('/reject/:email', async (req, res) => {
+  const users = readUsers();
+  const user = users.find(u => u.email === req.params.email);
+  if (!user) return res.status(404).json({ error: 'User not found' });
+
+  const { reason } = req.body;
+  if (!reason) return res.status(400).json({ error: 'Rejection reason required' });
+
+  user.ficaApproved = false;
+  user.rejectionReason = reason;
+  user.rejectedAt = new Date().toISOString();
+  writeUsers(users);
+
+  // Send FICA rejection email
+  try {
+    await sendMail({
+      to: user.email,
+      subject: 'FICA Documents Need Review - All4You Auctions',
+      text: `Dear ${user.name || user.email},\n\nYour FICA documents have been reviewed and need to be updated.\n\nReason: ${reason}\n\nPlease log in to your account and re-upload the required documents.\n\nThank you!`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #d97706;">FICA Documents Review Required</h2>
+          <p>Dear ${user.name || user.email},</p>
+          <p>Your FICA documents have been reviewed and need to be updated.</p>
+          <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 16px; margin: 20px 0;">
+            <h4 style="margin: 0 0 8px 0; color: #92400e;">Reason for Review:</h4>
+            <p style="margin: 0; color: #92400e;">${reason}</p>
+          </div>
+          <p>Please log in to your account and re-upload the required documents. Once updated, our team will review them again.</p>
+          <p>If you have any questions, please don't hesitate to contact us.</p>
+          <p>Thank you for your understanding!</p>
+          <p>Best regards,<br>All4You Auctions Team</p>
+        </div>
+      `
+    });
+  } catch (e) {
+    console.error('Failed to send FICA rejection email:', e);
+  }
+
+  res.json({ message: 'FICA documents rejected', user, reason });
 });
 
 const verifyAdmin = require('../auth/verify-admin');

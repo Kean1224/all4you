@@ -85,7 +85,8 @@ function createVerifiedUser(pendingUser) {
     emailVerifiedAt: new Date().toISOString(),
     watchlist: [],
     idDocument: pendingUser.idDocument,
-    proofOfAddress: pendingUser.proofOfAddress
+    proofOfAddress: pendingUser.proofOfAddress,
+    bankStatement: pendingUser.bankStatement
   };
   
   users.push(newUser);

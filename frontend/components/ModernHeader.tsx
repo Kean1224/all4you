@@ -197,11 +197,11 @@ export default function ModernHeader({
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed top-0 left-0 h-full w-80 bg-secondary-800 z-50 lg:hidden overflow-y-auto"
+              className="fixed top-0 left-0 h-full w-80 bg-secondary-800 z-50 lg:hidden"
             >
-              <div className="p-6">
+              <div className="flex flex-col h-full p-6">
                 {/* Mobile Logo */}
-                <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center justify-between mb-6">
                   <div className="w-[120px] h-[40px] bg-primary-500 rounded-lg flex items-center justify-center font-sora font-bold text-secondary-800 text-lg">
                     ALL4YOU
                   </div>
@@ -214,7 +214,7 @@ export default function ModernHeader({
                 </div>
 
                 {/* Mobile Navigation */}
-                <nav className="space-y-4 mb-8">
+                <nav className="space-y-3 mb-6 flex-shrink-0">
                   {navigation.map((item, index) => (
                     <motion.div
                       key={item.name}
@@ -225,7 +225,7 @@ export default function ModernHeader({
                       <Link
                         href={item.href}
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className={`block py-3 px-4 rounded-lg font-inter font-medium transition-all duration-200 ${
+                        className={`block py-2.5 px-4 rounded-lg font-inter font-medium transition-all duration-200 ${
                           pathname === item.href
                             ? 'bg-primary-500/20 text-primary-500 border-l-4 border-primary-500'
                             : 'text-white hover:bg-white/10 hover:text-primary-500'
@@ -238,13 +238,13 @@ export default function ModernHeader({
                 </nav>
 
                 {/* Mobile Actions */}
-                <div className="space-y-4">
-                  <button className="w-full flex items-center space-x-3 py-3 px-4 text-white hover:bg-white/10 rounded-lg transition-all duration-200">
+                <div className="space-y-3 mb-6 flex-shrink-0">
+                  <button className="w-full flex items-center space-x-3 py-2.5 px-4 text-white hover:bg-white/10 rounded-lg transition-all duration-200">
                     <MagnifyingGlassIcon className="w-5 h-5" />
                     <span className="font-inter">Search</span>
                   </button>
                   
-                  <button className="w-full flex items-center space-x-3 py-3 px-4 text-white hover:bg-white/10 rounded-lg transition-all duration-200">
+                  <button className="w-full flex items-center space-x-3 py-2.5 px-4 text-white hover:bg-white/10 rounded-lg transition-all duration-200">
                     <BellIcon className="w-5 h-5" />
                     <span className="font-inter">Notifications</span>
                     {notificationCount > 0 && (
@@ -256,23 +256,23 @@ export default function ModernHeader({
                 </div>
 
                 {/* Mobile Auth */}
-                <div className="mt-8 pt-8 border-t border-white/20">
+                <div className="mt-auto pt-6 border-t border-white/20 flex-shrink-0">
                   {isLoggedIn ? (
-                    <div className="space-y-4">
-                      <div className="flex items-center space-x-3 py-3 px-4">
-                        <div className="w-10 h-10 bg-primary-500 rounded-full flex items-center justify-center">
-                          <span className="text-secondary-800 font-bold">
+                    <div className="space-y-3">
+                      <div className="flex items-center space-x-3 py-2 px-4">
+                        <div className="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center">
+                          <span className="text-secondary-800 font-bold text-sm">
                             {userEmail.charAt(0).toUpperCase()}
                           </span>
                         </div>
                         <div>
-                          <p className="text-white font-inter font-medium">{userEmail.split('@')[0]}</p>
-                          <p className="text-gray-400 text-sm">{userEmail}</p>
+                          <p className="text-white font-inter font-medium text-sm">{userEmail.split('@')[0]}</p>
+                          <p className="text-gray-400 text-xs">{userEmail}</p>
                         </div>
                       </div>
                       <button 
                         onClick={handleLogout}
-                        className="w-full py-3 px-4 text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200 font-inter"
+                        className="w-full py-2.5 px-4 text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200 font-inter text-sm"
                       >
                         Sign Out
                       </button>
@@ -280,12 +280,12 @@ export default function ModernHeader({
                   ) : (
                     <div className="space-y-3">
                       <Link href="/login" onClick={() => setIsMobileMenuOpen(false)}>
-                        <button className="w-full py-3 px-4 text-white border border-white/30 rounded-lg hover:border-primary-500 hover:text-primary-500 transition-all duration-200 font-inter font-medium">
+                        <button className="w-full py-2.5 px-4 text-white border border-white/30 rounded-lg hover:border-primary-500 hover:text-primary-500 transition-all duration-200 font-inter font-medium text-sm">
                           Login
                         </button>
                       </Link>
                       <Link href="/register" onClick={() => setIsMobileMenuOpen(false)}>
-                        <button className="w-full py-3 px-4 bg-primary-500 text-secondary-800 rounded-lg font-inter font-bold hover:bg-primary-400 transition-all duration-200">
+                        <button className="w-full py-2.5 px-4 bg-primary-500 text-secondary-800 rounded-lg font-inter font-bold hover:bg-primary-400 transition-all duration-200 text-sm">
                           Sign Up
                         </button>
                       </Link>

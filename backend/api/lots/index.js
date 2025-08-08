@@ -355,6 +355,36 @@ router.put('/:auctionId/:lotId/autobid', authenticateToken, (req, res) => {
   if (!auction) return res.status(404).json({ error: 'Auction not found' });
   const lot = auction.lots.find(l => l.id === lotId);
   if (!lot) return res.status(404).json({ error: 'Lot not found' });
+
+  // ✅ FICA APPROVAL CHECK - User must be approved to set auto-bids
+  const usersPath = path.join(__dirname, '../../data/users.json');
+  let users = [];
+  if (fs.existsSync(usersPath)) {
+    users = JSON.parse(fs.readFileSync(usersPath, 'utf-8'));
+  }
+  
+  const user = users.find(u => u.email === bidderEmail);
+  if (!user) {
+    return res.status(403).json({ error: 'User not found. Please register to participate in auctions.' });
+  }
+  
+  if (!user.ficaApproved) {
+    if (user.rejectionReason) {
+      return res.status(403).json({ 
+        error: 'Your FICA documents were rejected. Please re-upload your documents for approval before setting auto-bids.',
+        rejectionReason: user.rejectionReason
+      });
+    } else {
+      return res.status(403).json({ 
+        error: 'Your FICA documents are pending approval. You will be able to set auto-bids once approved by our admin team.' 
+      });
+    }
+  }
+
+  if (user.suspended) {
+    return res.status(403).json({ error: 'Your account has been suspended. Please contact support.' });
+  }
+
   lot.autoBids = lot.autoBids || [];
   // Remove any previous autobid for this user
   lot.autoBids = lot.autoBids.filter(b => b.bidderEmail !== bidderEmail);
@@ -403,6 +433,43 @@ router.post('/:lotId/bid', async (req, res) => {
   }
 
   const auctionId = auction.id;
+
+  // ✅ FICA APPROVAL CHECK - User must be approved to bid
+  const usersPath = path.join(__dirname, '../../data/users.json');
+  let users = [];
+  if (fs.existsSync(usersPath)) {
+    users = JSON.parse(fs.readFileSync(usersPath, 'utf-8'));
+  }
+  
+  const user = users.find(u => u.email === bidderEmail);
+  if (!user) {
+    return res.status(403).json({ 
+      success: false, 
+      error: 'User not found. Please register to participate in auctions.' 
+    });
+  }
+  
+  if (!user.ficaApproved) {
+    if (user.rejectionReason) {
+      return res.status(403).json({ 
+        success: false, 
+        error: 'Your FICA documents were rejected. Please re-upload your documents for approval before bidding.',
+        rejectionReason: user.rejectionReason
+      });
+    } else {
+      return res.status(403).json({ 
+        success: false, 
+        error: 'Your FICA documents are pending approval. You will be able to bid once approved by our admin team.' 
+      });
+    }
+  }
+
+  if (user.suspended) {
+    return res.status(403).json({ 
+      success: false, 
+      error: 'Your account has been suspended. Please contact support.' 
+    });
+  }
 
   // Check if lot has ended
   if (lot.endTime && new Date().getTime() >= new Date(lot.endTime).getTime()) {

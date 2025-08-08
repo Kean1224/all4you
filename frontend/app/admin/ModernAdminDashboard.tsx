@@ -24,6 +24,7 @@ import {
   ShoppingBagIcon
 } from '@heroicons/react/24/outline';
 import { getToken } from '../../utils/auth';
+import AdminUserManagement from '../../components/AdminUserManagement';
 
 type DashboardStats = {
   totalUsers: number;
@@ -86,13 +87,16 @@ export default function ModernAdminDashboard() {
       const lots = auctions.reduce((acc: number, auction: any) => acc + (auction.lots?.length || 0), 0);
       const activeAuctions = auctions.filter((auction: any) => auction.status === 'active').length;
 
+      // Calculate pending FICA approvals
+      const pendingApprovals = users.filter(user => !user.ficaApproved && !user.rejectionReason).length;
+
       setStats({
         totalUsers: users.length || 156,
         totalAuctions: auctions.length || 23,
         totalLots: lots || 487,
         totalOffers: offers.length || 89,
         activeAuctions: activeAuctions || 8,
-        pendingApprovals: 12,
+        pendingApprovals: pendingApprovals,
         totalRevenue: 127500,
         monthlyGrowth: 23.5
       });
@@ -359,8 +363,20 @@ export default function ModernAdminDashboard() {
                 </motion.div>
               )}
 
+              {/* Users Tab */}
+              {activeTab === 'users' && (
+                <motion.div
+                  key="users"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                >
+                  <AdminUserManagement />
+                </motion.div>
+              )}
+
               {/* Other tabs would be implemented similarly */}
-              {activeTab !== 'overview' && (
+              {activeTab !== 'overview' && activeTab !== 'users' && (
                 <motion.div
                   key={activeTab}
                   initial={{ opacity: 0, y: 20 }}
