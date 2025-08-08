@@ -27,10 +27,11 @@ export default function CreateAuctionPage() {
     depositAmount: 0,
     description: ''
   });
+  const [auctionImage, setAuctionImage] = useState<File | null>(null);
 
   const [pendingItems, setPendingItems] = useState<PendingItem[]>([]);
   const [selectedLots, setSelectedLots] = useState<string[]>([]);
-  const [lotSettings, setLotSettings] = useState<{[key: string]: { startBid: number, lotEndTime: string }}>({});
+  const [lotSettings, setLotSettings] = useState<{[key: string]: { startBid: number, lotEndTime: string, images: File[], bidIncrement: number }}>({});
   const [isCreating, setIsCreating] = useState(false);
 
   // Helper to get admin auth headers
@@ -84,7 +85,9 @@ export default function CreateAuctionPage() {
             ...prev,
             [itemId]: {
               startBid: item.reserve || 10,
-              lotEndTime: form.endTime
+              lotEndTime: form.endTime,
+              images: [],
+              bidIncrement: form.increment || 10
             }
           }));
         }
@@ -116,7 +119,9 @@ export default function CreateAuctionPage() {
       const lotEndTime = new Date(baseEndTime.getTime() + (index * intervalMinutes * 60000));
       newSettings[lotId] = {
         ...newSettings[lotId],
-        lotEndTime: lotEndTime.toISOString().slice(0, 16) // Format for datetime-local input
+        lotEndTime: lotEndTime.toISOString().slice(0, 16), // Format for datetime-local input
+        images: newSettings[lotId]?.images || [],
+        bidIncrement: newSettings[lotId]?.bidIncrement || form.increment || 10
       };
     });
     setLotSettings(newSettings);
@@ -127,18 +132,25 @@ export default function CreateAuctionPage() {
     setIsCreating(true);
 
     try {
-      // First create the auction
+      // Create FormData for auction
+      const formData = new FormData();
+      Object.entries(form).forEach(([key, value]) => {
+        formData.append(key, value as string);
+      });
+      if (auctionImage) {
+        formData.append('auctionImage', auctionImage);
+      }
+
       const auctionResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auctions`, {
         method: 'POST',
-        headers: getAdminHeaders(),
-        body: JSON.stringify(form),
+        body: formData,
       });
-      
+
       if (!auctionResponse.ok) {
         const errorData = await auctionResponse.json();
         throw new Error(errorData.error || 'Failed to create auction');
       }
-      
+
       const auctionData = await auctionResponse.json();
       const auctionId = auctionData.id;
 
@@ -146,22 +158,33 @@ export default function CreateAuctionPage() {
       for (const itemId of selectedLots) {
         const item = pendingItems.find(i => i.id === itemId);
         const settings = lotSettings[itemId];
-        
+
         if (item && settings) {
+          // Create FormData for lot with multiple images
+          const lotFormData = new FormData();
+          lotFormData.append('title', item.title);
+          lotFormData.append('description', item.description);
+          lotFormData.append('category', item.category);
+          lotFormData.append('condition', item.condition);
+          lotFormData.append('startBid', settings.startBid.toString());
+          lotFormData.append('bidIncrement', settings.bidIncrement.toString());
+          lotFormData.append('endTime', settings.lotEndTime);
+          lotFormData.append('sellerEmail', item.sellerEmail);
+          lotFormData.append('sourceItemId', item.id);
+          
+          // Add existing image if available
+          if (item.imageUrl) {
+            lotFormData.append('existingImageUrl', item.imageUrl);
+          }
+          
+          // Add multiple images
+          settings.images.forEach((image, index) => {
+            lotFormData.append(`images`, image);
+          });
+
           const lotResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/lots/${auctionId}`, {
             method: 'POST',
-            headers: getAdminHeaders(),
-            body: JSON.stringify({
-              title: item.title,
-              description: item.description,
-              category: item.category,
-              condition: item.condition,
-              startBid: settings.startBid,
-              endTime: settings.lotEndTime,
-              imageUrl: item.imageUrl,
-              sellerEmail: item.sellerEmail,
-              sourceItemId: item.id
-            }),
+            body: lotFormData, // Send as FormData instead of JSON
           });
 
           if (!lotResponse.ok) {
@@ -171,7 +194,7 @@ export default function CreateAuctionPage() {
       }
 
       alert(`✅ Auction "${form.title}" created successfully with ${selectedLots.length} lots!`);
-      
+
       // Reset form
       setForm({ 
         title: '', 
@@ -183,12 +206,20 @@ export default function CreateAuctionPage() {
         depositAmount: 0,
         description: '' 
       });
+      setAuctionImage(null);
       setSelectedLots([]);
       setLotSettings({});
       
+      // Clean up any object URLs to prevent memory leaks
+      Object.values(lotSettings).forEach(setting => {
+        setting.images?.forEach(image => {
+          URL.revokeObjectURL(URL.createObjectURL(image));
+        });
+      });
+
       // Refresh pending items
       fetchPendingItems();
-      
+
     } catch (error) {
       console.error('Error creating auction:', error);
       alert(`❌ Failed to create auction: ${(error as Error).message}`);
@@ -220,6 +251,16 @@ export default function CreateAuctionPage() {
                     className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
                     placeholder="e.g., Monthly Estate Auction"
                   />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Auction Image</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={e => setAuctionImage(e.target.files?.[0] || null)}
+                    className="w-full border border-gray-300 px-4 py-2 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Upload an image for the auction (optional)</p>
                 </div>
                 
                 <div>
@@ -380,6 +421,58 @@ export default function CreateAuctionPage() {
                               onChange={e => updateLotSetting(item.id, 'lotEndTime', e.target.value)}
                               className="w-full border border-gray-300 px-2 py-1 rounded text-sm focus:ring-1 focus:ring-yellow-500"
                             />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700">Bid Increment (R)</label>
+                            <input
+                              type="number"
+                              min="1"
+                              value={lotSettings[item.id].bidIncrement}
+                              onChange={e => updateLotSetting(item.id, 'bidIncrement', Number(e.target.value))}
+                              className="w-full border border-gray-300 px-2 py-1 rounded text-sm focus:ring-1 focus:ring-yellow-500"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-2">Lot Images</label>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              multiple
+                              onChange={e => {
+                                if (e.target.files) {
+                                  const newImages = Array.from(e.target.files);
+                                  const currentImages = lotSettings[item.id].images || [];
+                                  updateLotSetting(item.id, 'images', [...currentImages, ...newImages]);
+                                }
+                              }}
+                              className="w-full border border-gray-300 px-2 py-1 rounded text-sm focus:ring-1 focus:ring-yellow-500 mb-2"
+                            />
+                            <p className="text-xs text-gray-500 mb-2">Upload multiple images for this lot</p>
+                            
+                            {/* Image Preview */}
+                            {lotSettings[item.id].images && lotSettings[item.id].images.length > 0 && (
+                              <div className="grid grid-cols-2 gap-2">
+                                {lotSettings[item.id].images.map((image, idx) => (
+                                  <div key={idx} className="relative">
+                                    <img
+                                      src={URL.createObjectURL(image)}
+                                      alt={`Preview ${idx + 1}`}
+                                      className="w-full h-20 object-cover rounded border"
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const newImages = lotSettings[item.id].images.filter((_, i) => i !== idx);
+                                        updateLotSetting(item.id, 'images', newImages);
+                                      }}
+                                      className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
+                                    >
+                                      ×
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         </div>
                       )}

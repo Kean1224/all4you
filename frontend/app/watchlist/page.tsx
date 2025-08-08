@@ -181,19 +181,34 @@ export default function WatchlistPage() {
                 <div key={lot.id} className="bg-white/90 rounded-2xl shadow-lg border border-yellow-100 p-6 hover:shadow-2xl transition-all duration-150">
                   {/* Lot Image */}
                   <div className="relative w-full h-48 mb-4 rounded-xl overflow-hidden group">
-                    <img 
-                      src={
-                        lot.image ? 
-                          (lot.image.startsWith('/uploads') ? `${process.env.NEXT_PUBLIC_API_URL}${lot.image}` : `${process.env.NEXT_PUBLIC_API_URL}/uploads/lots/${lot.image}`) :
-                        lot.imageUrl ? 
-                          (lot.imageUrl.startsWith('/uploads') ? `${process.env.NEXT_PUBLIC_API_URL}${lot.imageUrl}` : `${process.env.NEXT_PUBLIC_API_URL}/uploads/lots/${lot.imageUrl}`) :
-                        '/placeholder.jpg'
-                      } 
-                      alt={lot.title}
-                      className="w-full h-full object-cover cursor-pointer transition-transform duration-300 group-hover:scale-105"
-                      onClick={() => {
-                        // Create a simple image viewer for single images
-                        const imgSrc = lot.image ? 
+                    {(lot.image && lot.image.trim() !== "") || (lot.imageUrl && lot.imageUrl.trim() !== "") ? (
+                      <img 
+                        src={
+                          lot.image ? 
+                            (lot.image.startsWith('/uploads') ? `${process.env.NEXT_PUBLIC_API_URL}${lot.image}` : `${process.env.NEXT_PUBLIC_API_URL}/uploads/lots/${lot.image}`) :
+                          lot.imageUrl ? 
+                            (lot.imageUrl.startsWith('/uploads') ? `${process.env.NEXT_PUBLIC_API_URL}${lot.imageUrl}` : `${process.env.NEXT_PUBLIC_API_URL}/uploads/lots/${lot.imageUrl}`) :
+                          '/placeholder.jpg'
+                        } 
+                        alt={lot.title}
+                        className="w-full h-full object-cover cursor-pointer transition-transform duration-300 group-hover:scale-105"
+                        onClick={() => {
+                          // Create a simple image viewer for single images
+                          const imgSrc = lot.image ? 
+                            (lot.image.startsWith('/uploads') ? `${process.env.NEXT_PUBLIC_API_URL}${lot.image}` : `${process.env.NEXT_PUBLIC_API_URL}/uploads/lots/${lot.image}`) :
+                            lot.imageUrl ? 
+                              (lot.imageUrl.startsWith('/uploads') ? `${process.env.NEXT_PUBLIC_API_URL}${lot.imageUrl}` : `${process.env.NEXT_PUBLIC_API_URL}/uploads/lots/${lot.imageUrl}`) :
+                            '/placeholder.jpg';
+                          // ...existing code...
+                        }}
+                      />
+                    ) : (
+                      <img 
+                        src={'/placeholder.jpg'}
+                        alt={lot.title}
+                        className="w-full h-full object-cover cursor-pointer transition-transform duration-300 group-hover:scale-105"
+                      />
+                    )}
                           (lot.image.startsWith('/uploads') ? `${process.env.NEXT_PUBLIC_API_URL}${lot.image}` : `${process.env.NEXT_PUBLIC_API_URL}/uploads/lots/${lot.image}`) :
                         lot.imageUrl ? 
                           (lot.imageUrl.startsWith('/uploads') ? `${process.env.NEXT_PUBLIC_API_URL}${lot.imageUrl}` : `${process.env.NEXT_PUBLIC_API_URL}/uploads/lots/${lot.imageUrl}`) :

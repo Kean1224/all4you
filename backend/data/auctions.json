@@ -8,7 +8,7 @@
     "endTime": "2025-07-22T18:00:00.000Z",
     "increment": 10,
     "createdAt": "2025-07-20T09:00:00.000Z",
-    "viewCount": 5,
+    "viewCount": 10,
     "auctionImage": "",
     "lots": [
       {
@@ -101,7 +101,8 @@
     ],
     "depositRequired": false,
     "depositAmount": 0,
-    "createdAt": "2025-07-22T20:59:14.335Z"
+    "createdAt": "2025-07-22T20:59:14.335Z",
+    "viewCount": 4
   },
   {
     "id": "0a5bad08-8474-45d5-bc71-7204616cdf81",
@@ -111,10 +112,102 @@
     "startTime": "2025-07-23T14:15",
     "endTime": "2025-07-25T14:15",
     "increment": 50,
-    "lots": [],
+    "lots": [
+      {
+        "id": "65e62762-7a1f-4c61-9eb0-08f7ede7ca1d",
+        "title": "kar",
+        "description": "baie goeie toestand",
+        "startPrice": 500,
+        "image": "/uploads/lots/985a36c1-5388-4c60-b3e8-f9c6b8a980cf.png",
+        "currentBid": 500,
+        "bidIncrement": 50,
+        "bidHistory": [],
+        "endTime": "2025-08-07T11:44:58.215Z",
+        "createdAt": "2025-08-07T11:39:58.413Z",
+        "sellerEmail": null,
+        "lotNumber": 1,
+        "condition": "Good"
+      },
+      {
+        "id": "652feab5-81c3-4d89-9a15-6b7805942ec3",
+        "title": "groot",
+        "description": "qergadg rgargar aergr rga ergaerg ragreg ",
+        "startPrice": 50,
+        "image": "/uploads/lots/4a55de8f-d848-4309-a475-d4c1fa5f33cd.png",
+        "currentBid": 50,
+        "bidIncrement": 10,
+        "bidHistory": [],
+        "endTime": "2025-08-07T11:53:24.025Z",
+        "createdAt": "2025-08-07T11:47:24.036Z",
+        "sellerEmail": null,
+        "lotNumber": 2,
+        "condition": "Good"
+      },
+      {
+        "id": "123cdc37-9236-47a0-b13e-d5602eaa631e",
+        "title": "SDGADFSG",
+        "description": "ASGASDG",
+        "startPrice": 50,
+        "image": "/uploads/lots/5e403c25-b508-4b0b-aa59-b7037bf64748.png",
+        "currentBid": 50,
+        "bidIncrement": 20,
+        "bidHistory": [],
+        "endTime": "2025-08-07T12:00:15.693Z",
+        "createdAt": "2025-08-07T11:53:15.706Z",
+        "sellerEmail": null,
+        "lotNumber": 3,
+        "condition": "Good"
+      },
+      {
+        "id": "016db566-5216-402f-ac36-54be0e8b20f2",
+        "title": "4twertgewt",
+        "description": "ertertv trqetqerrt",
+        "startPrice": 50,
+        "image": "/uploads/lots/2d5e0494-d636-4616-aa0f-94a5eed2c039.png",
+        "currentBid": 50,
+        "bidIncrement": 20,
+        "bidHistory": [],
+        "endTime": "2025-08-07T12:06:05.330Z",
+        "createdAt": "2025-08-07T11:58:05.345Z",
+        "sellerEmail": null,
+        "lotNumber": 4,
+        "condition": "Good"
+      },
+      {
+        "id": "f9b13a87-160d-4a79-9df4-c504ba879e3b",
+        "title": "ghghghhg",
+        "description": "hzgfhxfzgh",
+        "startPrice": 50,
+        "image": "/uploads/lots/b4149465-1e4e-450b-9b7e-fe02bf47ee05.png",
+        "currentBid": 50,
+        "bidIncrement": 20,
+        "bidHistory": [],
+        "endTime": "2025-08-07T12:32:18.342Z",
+        "createdAt": "2025-08-07T12:23:18.352Z",
+        "sellerEmail": null,
+        "lotNumber": 5,
+        "condition": "Good"
+      },
+      {
+        "id": "e3c5a701-671a-4a7f-a4e1-35215d751027",
+        "title": "bakkie",
+        "description": "4x4 d4d ",
+        "startPrice": 55000,
+        "image": "/uploads/lots/80574070-f2fe-494f-8cbc-120bd942375d.png",
+        "currentBid": 55000,
+        "bidIncrement": 500,
+        "bidHistory": [],
+        "endTime": "2025-08-09T08:50",
+        "createdAt": "2025-08-08T06:50:55.141Z",
+        "sellerEmail": null,
+        "lotNumber": 6,
+        "condition": "Good"
+      }
+    ],
     "depositRequired": false,
     "depositAmount": 0,
-    "createdAt": "2025-07-23T12:16:02.326Z"
+    "createdAt": "2025-07-23T12:16:02.326Z",
+    "viewCount": 59
   },
   {
     "id": "5b2d777c-8e46-409a-93ad-f6b4be20b03b",

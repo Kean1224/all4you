@@ -11,7 +11,9 @@ function LotCard({
   toggleDescription,
   biddingLoading,
   handlePlaceBid,
-  openImageModal
+  openImageModal,
+  openVideoModal,
+  sniperProtectionActive
 }: {
   lot: Lot;
   auctionId: string;
@@ -23,73 +25,239 @@ function LotCard({
   biddingLoading: string | null;
   handlePlaceBid: (lotId: string, currentBid: number, increment: number) => void;
   openImageModal: (images: string[], currentIndex: number, lotTitle: string) => void;
+  openVideoModal: (videoUrl: string, lotTitle: string) => void;
+  sniperProtectionActive?: boolean;
 }) {
-  const images = lot.imageUrl ? [lot.imageUrl] : [];
-  const lotNumber = index + 1;
+  const images = lot.images?.length ? lot.images : (lot.imageUrl || lot.image ? [lot.imageUrl || lot.image] : []);
+  const lotNumber = lot.lotNumber || index + 1;
   const lotEndTime = lot.endTime || '';
+  const startPrice = lot.startingPrice || lot.startPrice || 0;
+  const currentBid = lot.currentBid || startPrice;
+  const nextBidAmount = currentBid + (lot.bidIncrement || 100);
+  const reserveMet = lot.reservePrice ? currentBid >= lot.reservePrice : true;
+  
+  // Check if current user is the highest bidder
+  const userEmail = typeof window !== 'undefined' ? (localStorage.getItem('userEmail') || localStorage.getItem('user_email')) : null;
+  const lastBid = lot.bidHistory?.[lot.bidHistory.length - 1];
+  const isUserHighestBidder = lastBid && lastBid.bidderEmail === userEmail;
+  
+  // Determine if lot has actually ended based on time
+  const isLotEnded = () => {
+    if (!lotEndTime) return lot.status === 'ended';
+    const now = new Date().getTime();
+    const endTime = new Date(lotEndTime).getTime();
+    return now >= endTime || lot.status === 'ended';
+  };
+  
+  const lotEnded = isLotEnded();
+  
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'open': case 'live': return 'bg-green-500 text-white';
+      case 'ended': return 'bg-red-500 text-white';
+      case 'not_started': case 'pending': return 'bg-blue-500 text-white';
+      default: return 'bg-gray-500 text-white';
+    }
+  };
+
+  const specialConditions = [];
+  if (lot.vatApplicable) specialConditions.push('VAT Applies');
+  if (lot.soldAsIs) specialConditions.push('Sold As-Is');
+  if (lot.specialConditions) specialConditions.push(...lot.specialConditions);
+
   return (
     <motion.div
       key={lot.id}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.08 }}
-      className="bg-white/20 backdrop-blur-2xl border border-white/30 rounded-3xl overflow-hidden hover:bg-white/30 hover:shadow-2xl transition-all duration-300 relative shadow-lg"
+      className="bg-gradient-to-br from-white to-gray-50 border-2 border-gray-200 rounded-2xl overflow-hidden hover:border-green-400 hover:shadow-2xl transition-all duration-300 relative shadow-lg group"
     >
-      {/* Timer and Watchlist */}
-      <div className="absolute top-3 left-3 flex gap-2 items-center z-10">
+      {/* Compact Header */}
+      <div className="absolute top-2 left-2 flex gap-1 items-center z-10">
+        <span className="px-2 py-1 bg-black text-white text-xs font-bold rounded-full">
+          #{lotNumber}
+        </span>
         <LotTimer endTime={lotEndTime} lotNumber={lotNumber} />
       </div>
-      <button
-        className={`absolute top-3 right-3 px-3 py-1 rounded-xl text-xs font-bold border-2 z-10 shadow ${watchlist.includes(lot.id) ? 'bg-yellow-200 border-yellow-400 text-yellow-900' : 'bg-white/30 border-white/50 text-gray-800 hover:bg-white/50'}`}
-        onClick={() => toggleWatchlist(lot.id)}
-      >
-        {watchlist.includes(lot.id) ? '★ Watchlisted' : '☆ Watchlist'}
-      </button>
-      <div className="relative h-52 overflow-hidden cursor-pointer group" onClick={() => openImageModal(images, 0, lot.title)}>
-        {lot.imageUrl ? (
-          <Image
-            src={lot.imageUrl}
-            alt={lot.title || 'Auction Lot Image'}
-            fill
-            className="object-cover group-hover:scale-110 transition-transform duration-500"
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.src = '';
-            }}
-          />
+      
+      {/* Watchlist Button */}
+      <div className="absolute top-2 right-2 z-10">
+        <button
+          className={`p-1 rounded-full shadow-lg transition-all ${watchlist.includes(lot.id) ? 'bg-yellow-400 text-black' : 'bg-white/80 text-gray-600 hover:bg-white'}`}
+          onClick={() => toggleWatchlist(lot.id)}
+        >
+          {watchlist.includes(lot.id) ? '★' : '☆'}
+        </button>
+      </div>
+
+      {/* Image Section */}
+      <div className="relative h-32 overflow-hidden cursor-pointer" onClick={() => openImageModal(images, 0, lot.title)}>
+        {images.length > 0 ? (
+          <>
+            <Image
+              src={images[0].startsWith('http') ? images[0] : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${images[0]}`}
+              alt={lot.title || 'Auction Lot Image'}
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-700"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = '';
+              }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            {images.length > 1 && (
+              <div className="absolute bottom-2 right-2 bg-black/80 text-white px-2 py-1 rounded-full text-xs font-bold">
+                +{images.length - 1}
+              </div>
+            )}
+          </>
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center">
-            <TagIcon className="w-12 h-12 text-gray-400" />
+          <div className="w-full h-full bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center">
+            <TagIcon className="w-12 h-12 text-white" />
           </div>
+        )}
+        {lot.videoUrl && (
+          <button 
+            className="absolute bottom-2 left-2 bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded-full text-xs font-bold transition-colors shadow-lg"
+            onClick={(e) => {
+              e.stopPropagation();
+              openVideoModal(lot.videoUrl!, lot.title);
+            }}
+          >
+            🎥
+          </button>
         )}
       </div>
-      <div className="p-7 flex flex-col h-full">
-        <h3 className="text-xl font-extrabold text-gray-900 mb-2 line-clamp-2 drop-shadow-lg">{lot.title}</h3>
-        {lot.description && (
-          <p className="text-gray-700 text-base mb-4 line-clamp-2 font-light">
-            {expandedDescriptions[lot.id] ? lot.description : (lot.description?.slice(0, 80) || '')}
-            {lot.description && lot.description.length > 80 && (
-              <button className="ml-2 text-green-600 underline text-xs font-semibold" onClick={e => { e.stopPropagation(); toggleDescription(lot.id); }}>
-                {expandedDescriptions[lot.id] ? 'Show less' : 'Read more'}
-              </button>
-            )}
-          </p>
-        )}
-        <div className="flex items-center justify-between mt-auto">
-          <div>
-            <div className="text-gray-500 text-xs">Current Bid</div>
-            <div className="text-xl font-extrabold text-green-600">R{(lot.currentBid || 0).toLocaleString()}</div>
-            <div className="text-xs text-gray-400">Min Increment: R{lot.bidIncrement || 100}</div>
+
+      {/* Streamlined Content */}
+      <div className="p-4">
+        {/* Title and Price Row */}
+        <div className="flex justify-between items-start mb-2">
+          <h3 className="text-base font-bold text-gray-900 line-clamp-2 flex-1 mr-2">{lot.title}</h3>
+          <div className="text-right flex-shrink-0">
+            <div className="text-xs text-gray-500">Starting</div>
+            <div className="text-sm font-bold text-blue-600">R{startPrice.toLocaleString()}</div>
           </div>
-          <button
-            className={`px-5 py-2 rounded-xl font-bold text-white shadow-lg transition-all text-base ${biddingLoading === lot.id ? 'bg-gray-400 cursor-not-allowed' : 'bg-gradient-to-r from-green-500 to-green-700 hover:from-green-600 hover:to-green-800'}`}
-            disabled={biddingLoading === lot.id}
-            onClick={() => handlePlaceBid(lot.id, lot.currentBid, lot.bidIncrement || 100)}
-          >
-            {biddingLoading === lot.id ? 'Bidding...' : 'Bid'}
-          </button>
         </div>
-        <div className="text-right text-gray-500 text-xs mt-2">{lot.bidHistory?.length || 0} bids</div>
+
+        {/* Status Badges - Only show if important */}
+        {(lot.reservePrice || specialConditions.length > 0) && (
+          <div className="flex gap-1 mb-2">
+            {lot.reservePrice && (
+              <span className={`text-xs font-bold px-2 py-1 rounded-full ${reserveMet ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                {reserveMet ? '✓ Reserve Met' : '⚠ Reserve'}
+              </span>
+            )}
+            {specialConditions.slice(0, 1).map((condition, idx) => (
+              <span key={idx} className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full">
+                {condition.length > 10 ? condition.slice(0, 10) + '...' : condition}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Current Bid Section */}
+        <div className={`rounded-xl p-3 mb-3 bg-gradient-to-r ${
+          isUserHighestBidder 
+            ? 'from-green-500 to-green-600 text-white' 
+            : 'from-blue-500 to-blue-600 text-white'
+        } shadow-lg`}>
+          <div className="flex justify-between items-center">
+            <div>
+              {isUserHighestBidder && (
+                <div className="text-xs font-bold mb-1 flex items-center gap-1">
+                  🏆 You're Winning!
+                </div>
+              )}
+              <div className="text-xs opacity-90">Current Bid</div>
+              <div className="text-xl font-bold">
+                R{currentBid.toLocaleString()}
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-xs opacity-90">{lot.bidHistory?.length || 0} bids</div>
+              {!isUserHighestBidder && (
+                <div className="text-sm font-semibold bg-white/20 px-2 py-1 rounded-full">
+                  Next: R{nextBidAmount.toLocaleString()}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        {lotEnded ? (
+          <div className="bg-red-100 border-2 border-red-300 rounded-xl p-3 text-center">
+            <div className="text-red-700 font-bold">🔨 AUCTION ENDED</div>
+            <div className="text-red-600 text-sm">Final: R{currentBid.toLocaleString()}</div>
+            {isUserHighestBidder && (
+              <div className="text-green-700 text-sm font-bold mt-1">🏆 You Won!</div>
+            )}
+          </div>
+        ) : isUserHighestBidder ? (
+          <div className="bg-green-100 border-2 border-green-300 rounded-xl p-3 text-center">
+            <div className="text-green-700 font-bold">🥇 You're the Highest Bidder!</div>
+            <div className="text-green-600 text-sm">Keep watching for new bids</div>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {/* Main Bid Button */}
+            <button
+              className={`w-full py-4 px-4 rounded-xl font-bold text-lg shadow-xl transition-all duration-200 transform ${
+                biddingLoading === lot.id 
+                  ? 'bg-gray-400 cursor-not-allowed text-white scale-95' 
+                  : 'bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white hover:scale-105 active:scale-95 hover:shadow-2xl'
+              }`}
+              disabled={biddingLoading === lot.id}
+              onClick={() => handlePlaceBid(lot.id, currentBid, lot.bidIncrement || 100)}
+            >
+              {biddingLoading === lot.id ? (
+                <div className="flex items-center justify-center gap-2">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  Placing Bid...
+                </div>
+              ) : (
+                <div className="flex items-center justify-center gap-2">
+                  <span>🚀 BID R{nextBidAmount.toLocaleString()}</span>
+                </div>
+              )}
+            </button>
+            
+            {/* Quick Bid Options */}
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                className="py-2 px-3 bg-gradient-to-r from-blue-400 to-blue-500 hover:from-blue-500 hover:to-blue-600 text-white text-sm font-bold rounded-lg transition-all hover:scale-105 shadow-lg"
+                onClick={() => handlePlaceBid(lot.id, currentBid, (lot.bidIncrement || 100) * 2)}
+                disabled={biddingLoading === lot.id}
+              >
+                Quick +R{((lot.bidIncrement || 100) * 2).toLocaleString()}
+              </button>
+              <button
+                className="py-2 px-3 bg-gradient-to-r from-purple-400 to-purple-500 hover:from-purple-500 hover:to-purple-600 text-white text-sm font-bold rounded-lg transition-all hover:scale-105 shadow-lg"
+                onClick={() => handlePlaceBid(lot.id, currentBid, (lot.bidIncrement || 100) * 5)}
+                disabled={biddingLoading === lot.id}
+              >
+                Max +R{((lot.bidIncrement || 100) * 5).toLocaleString()}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Footer Stats */}
+        <div className="flex justify-between items-center text-xs text-gray-500 mt-3 pt-3 border-t border-gray-200">
+          <span className="flex items-center gap-1">
+            👁 {lot.views || 0} views
+          </span>
+          <span className="flex items-center gap-1">
+            ❤️ {lot.watchers || 0} watching
+          </span>
+          {lot.condition && (
+            <span className="px-2 py-1 bg-gray-100 rounded-full text-xs">
+              {lot.condition}
+            </span>
+          )}
+        </div>
       </div>
     </motion.div>
   );
@@ -107,41 +275,79 @@ import BidNotifications from '../../components/BidNotifications';
 // Make sure to set NEXT_PUBLIC_WS_URL in your .env.local for production or custom setups
 const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:5051';
 
+console.log('WebSocket URL:', WS_URL); // Debug log
+
 // API URL for local development
 // Make sure to set NEXT_PUBLIC_API_URL in your .env.local for production or custom setups
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-// Timer component for each lot
+// Enhanced Timer component for each lot with different display formats
 function LotTimer({ endTime, lotNumber }: { endTime: string; lotNumber: number }) {
   const [timeLeft, setTimeLeft] = useState<string>('');
   const [isExpired, setIsExpired] = useState(false);
+  const [isUrgent, setIsUrgent] = useState(false);
+  const [totalSeconds, setTotalSeconds] = useState(0);
 
   useEffect(() => {
+    if (!endTime) {
+      setTimeLeft('No end time');
+      return;
+    }
+
     const timer = setInterval(() => {
       const now = new Date().getTime();
       const end = new Date(endTime).getTime();
       const difference = end - now;
+      const totalSecs = Math.floor(difference / 1000);
+      setTotalSeconds(totalSecs);
+
       if (difference <= 0) {
         setTimeLeft('ENDED');
         setIsExpired(true);
+        setIsUrgent(false);
         clearInterval(timer);
         return;
       }
+
+      // Mark as urgent if less than 5 minutes (300 seconds)
+      setIsUrgent(totalSecs <= 300);
+
       const days = Math.floor(difference / (1000 * 60 * 60 * 24));
       const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((difference % (1000 * 60)) / 1000);
-      if (days > 0) {
-        setTimeLeft(`${days}d ${hours}h ${minutes}m ${seconds}s`);
+
+      // Different display formats based on time remaining
+      if (days > 7) {
+        setTimeLeft(`${days}d ${hours}h`);
+      } else if (days > 0) {
+        setTimeLeft(`${days}d ${hours}h ${minutes}m`);
       } else if (hours > 0) {
         setTimeLeft(`${hours}h ${minutes}m ${seconds}s`);
-      } else {
+      } else if (minutes > 5) {
         setTimeLeft(`${minutes}m ${seconds}s`);
+      } else {
+        // Show seconds for last 5 minutes
+        setTimeLeft(`${minutes}:${seconds.toString().padStart(2, '0')}`);
       }
     }, 1000);
+
     return () => clearInterval(timer);
   }, [endTime]);
+
+  const getTimerStyle = () => {
+    if (isExpired) {
+      return 'bg-red-500 text-white border-red-600';
+    } else if (isUrgent) {
+      return 'bg-red-600 text-white border-red-700 animate-pulse';
+    } else if (totalSeconds <= 3600) { // Less than 1 hour
+      return 'bg-orange-500 text-white border-orange-600';
+    } else {
+      return 'bg-green-600 text-white border-green-700';
+    }
+  };
+
   return (
-    <div className={`px-2 py-1 rounded-lg font-mono text-xs font-bold ${isExpired ? 'bg-red-500 text-white' : 'bg-green-900 text-green-200'}`}>
+    <div className={`px-2 py-1 rounded-lg font-mono text-xs font-bold border-2 shadow ${getTimerStyle()}`}>
       {isExpired ? '⏰ ENDED' : `🕒 ${timeLeft}`}
     </div>
   );
@@ -170,12 +376,29 @@ type Lot = {
   title: string;
   description: string;
   imageUrl?: string;
+  images?: string[];
   currentBid: number;
   startingPrice?: number;
-  status: 'open' | 'ended' | 'pending';
+  startPrice?: number;
+  reservePrice?: number;
+  reserveMet?: boolean;
+  status: 'open' | 'ended' | 'pending' | 'not_started';
   bidHistory?: any[];
   bidIncrement?: number;
   endTime?: string;
+  lotNumber?: number;
+  location?: string;
+  condition?: string;
+  sellerName?: string;
+  sellerEmail?: string;
+  videoUrl?: string;
+  specialConditions?: string[];
+  vatApplicable?: boolean;
+  soldAsIs?: boolean;
+  sniperProtection?: boolean;
+  views?: number;
+  watchers?: number;
+  category?: string;
 };
 
 type Auction = {
@@ -201,25 +424,76 @@ export default function AuctionDetailPage() {
   const [biddingLoading, setBiddingLoading] = useState<string | null>(null);
   const [watchlist, setWatchlist] = useState<string[]>([]);
   const [imageModal, setImageModal] = useState({ isOpen: false, images: [], currentIndex: 0, lotTitle: '' });
+  const [videoModal, setVideoModal] = useState({ isOpen: false, videoUrl: '', lotTitle: '' });
   const [expandedDescriptions, setExpandedDescriptions] = useState<{[key: string]: boolean}>({});
+  const [sniperProtections, setSniperProtections] = useState<{[key: string]: boolean}>({});
   const wsRef = useRef<WebSocket | null>(null);
   const params = useParams();
   const auctionId = params.auctionId as string;
   // --- WebSocket: Live Bidding ---
   useEffect(() => {
     if (!auctionId) return;
+    
+    // Add a small delay to ensure the component is fully mounted
+    const connectTimer = setTimeout(() => {
+      connectWebSocket();
+    }, 1000);
+    
+    return () => {
+      clearTimeout(connectTimer);
+      if (wsRef.current) {
+        wsRef.current.close();
+        wsRef.current = null;
+      }
+    };
+  }, [auctionId]);
+
+  const connectWebSocket = () => {
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) return;
     if (wsRef.current) wsRef.current.close();
+    
     let ws;
     try {
-      ws = new window.WebSocket(`${WS_URL}/?auctionId=${auctionId}`);
+      console.log('Attempting to connect to WebSocket:', WS_URL);
+      ws = new window.WebSocket(WS_URL);
       wsRef.current = ws;
+      
+      ws.onopen = () => {
+        console.log('✅ WebSocket connected successfully to', WS_URL);
+        // Get user email from localStorage (or use a default/guest identifier)
+        const userEmail = localStorage.getItem('userEmail') || `guest_${Math.random().toString(36).substr(2, 9)}`;
+        console.log('Registering user:', userEmail);
+        
+        // Register with the WebSocket server
+        ws.send(JSON.stringify({
+          type: 'register',
+          email: userEmail
+        }));
+        
+        // Subscribe to auction updates
+        ws.send(JSON.stringify({
+          type: 'subscribe_auction',
+          auctionId: auctionId
+        }));
+        
+        setNotifications((prev) => [
+          ...prev,
+          {
+            id: Date.now() + Math.random(),
+            message: 'Connected to live bidding',
+            type: 'success',
+            timestamp: Date.now(),
+          },
+        ]);
+      };
     } catch (e) {
+      console.warn('WebSocket connection creation failed (continuing without live bidding):', e);
       setNotifications((prev) => [
         ...prev,
         {
           id: Date.now() + Math.random(),
-          message: 'WebSocket connection failed: ' + (e instanceof Error ? e.message : ''),
-          type: 'error',
+          message: 'Live bidding unavailable. You can still view auctions and place bids.',
+          type: 'warning',
           timestamp: Date.now(),
         },
       ]);
@@ -228,16 +502,45 @@ export default function AuctionDetailPage() {
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        if (data.type === 'bid_update' && data.lotId && data.newBid) {
+        // Handle different WebSocket message types
+        if (data.type === 'connection_confirmed') {
+          console.log('WebSocket registration confirmed:', data.message);
+        } else if (data.type === 'auction_subscribed') {
+          console.log('Auction subscription confirmed:', data.message);
+        } else if (data.type === 'bid_update' && data.lotId && data.newBid) {
           setAuction((prev) => {
             if (!prev) return prev;
             return {
               ...prev,
               lots: prev.lots.map(lot =>
-                lot.id === data.lotId ? { ...lot, currentBid: data.newBid, bidHistory: data.bidHistory } : lot
+                lot.id === data.lotId ? { 
+                  ...lot, 
+                  currentBid: data.newBid, 
+                  bidHistory: data.bidHistory,
+                  endTime: data.extendedEndTime || lot.endTime // Update end time if extended
+                } : lot
               )
             };
           });
+          
+          // Handle sniper protection notification
+          if (data.sniperProtectionActivated) {
+            setSniperProtections(prev => ({ ...prev, [data.lotId]: true }));
+            setNotifications((prev) => [
+              ...prev,
+              {
+                id: Date.now() + Math.random(),
+                message: `🛡️ Sniper Protection: Lot ending time extended due to late bid!`,
+                type: 'warning',
+                timestamp: Date.now(),
+              },
+            ]);
+            // Remove sniper protection indicator after 5 seconds
+            setTimeout(() => {
+              setSniperProtections(prev => ({ ...prev, [data.lotId]: false }));
+            }, 5000);
+          }
+          
           setNotifications((prev) => [
             ...prev,
             {
@@ -272,49 +575,126 @@ export default function AuctionDetailPage() {
       }
     };
     ws.onerror = (event) => {
+      console.error('❌ WebSocket error occurred:', event);
+      console.error('WebSocket readyState:', ws.readyState);
+      console.error('WebSocket URL was:', WS_URL);
+      
+      // Try to provide more specific error information
+      let errorMessage = 'WebSocket connection error';
+      if (ws.readyState === WebSocket.CONNECTING) {
+        errorMessage = 'Failed to connect to WebSocket server. Server may be down.';
+      } else if (ws.readyState === WebSocket.CLOSING) {
+        errorMessage = 'WebSocket connection is closing unexpectedly.';
+      } else if (ws.readyState === WebSocket.CLOSED) {
+        errorMessage = 'WebSocket connection was closed unexpectedly.';
+      }
+      
       setNotifications((prev) => [
         ...prev,
         {
           id: Date.now() + Math.random(),
-          message: 'WebSocket error: ' + (event && event.message ? event.message : ''),
-          type: 'error',
-          timestamp: Date.now(),
-        },
-      ]);
-    };
-    ws.onclose = (event) => {
-      setNotifications((prev) => [
-        ...prev,
-        {
-          id: Date.now() + Math.random(),
-          message: 'WebSocket closed' + (event && event.reason ? ': ' + event.reason : ''),
+          message: `${errorMessage} You can still view auctions and place bids normally.`,
           type: 'warning',
           timestamp: Date.now(),
         },
       ]);
     };
-    return () => {
-      if (wsRef.current) {
-        wsRef.current.close();
-        wsRef.current = null;
+    
+    ws.onclose = (event) => {
+      console.log('WebSocket closed:', event.code, event.reason);
+      if (event.code !== 1000) { // 1000 is normal closure
+        setNotifications((prev) => [
+          ...prev,
+          {
+            id: Date.now() + Math.random(),
+            message: 'Connection to live bidding lost. Attempting to reconnect...',
+            type: 'warning',
+            timestamp: Date.now(),
+          },
+        ]);
+        
+        // Attempt to reconnect after 3 seconds
+        setTimeout(() => {
+          if (wsRef.current?.readyState === WebSocket.CLOSED) {
+            console.log('Attempting WebSocket reconnection...');
+            connectWebSocket();
+          }
+        }, 3000);
       }
     };
-  }, [auctionId]);
+  };
   // Remove notification by id
   const removeNotification = (id: any) => {
     setNotifications((prev) => prev.filter((n) => n.id !== id));
   };
 
-  // Place bid
+  // Enhanced bid placement with validation
   const handlePlaceBid = async (lotId: string, currentBid: number, increment: number) => {
+    // Get current user info
+    const userEmail = localStorage.getItem('userEmail') || localStorage.getItem('user_email');
+    
+    if (!userEmail) {
+      setNotifications((prev) => [
+        ...prev,
+        {
+          id: Date.now() + Math.random(),
+          message: '🔒 Please login to place bids',
+          type: 'warning',
+          timestamp: Date.now(),
+        },
+      ]);
+      return;
+    }
+
+    // Find the lot to get its details
+    const lot = auction?.lots.find(l => l.id === lotId);
+    if (!lot) return;
+
+    // Validate bid increment
+    const requiredIncrement = lot.bidIncrement || 100;
+    if (increment < requiredIncrement) {
+      setNotifications((prev) => [
+        ...prev,
+        {
+          id: Date.now() + Math.random(),
+          message: `❌ Minimum bid increment is R${requiredIncrement.toLocaleString()}`,
+          type: 'error',
+          timestamp: Date.now(),
+        },
+      ]);
+      return;
+    }
+
+    // Check if user is already highest bidder
+    const lastBid = lot.bidHistory?.[lot.bidHistory.length - 1];
+    if (lastBid && lastBid.bidderEmail === userEmail) {
+      setNotifications((prev) => [
+        ...prev,
+        {
+          id: Date.now() + Math.random(),
+          message: '🏆 You are already the highest bidder! Wait for others to outbid you.',
+          type: 'info',
+          timestamp: Date.now(),
+        },
+      ]);
+      return;
+    }
+
+    const proposedBid = currentBid + increment;
     setBiddingLoading(lotId);
+    
     try {
       const res = await fetch(`${API_URL}/api/lots/${lotId}/bid`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: currentBid + increment }),
+        body: JSON.stringify({ 
+          amount: proposedBid,
+          bidderEmail: userEmail,
+          increment: increment
+        }),
         credentials: 'include',
       });
+      
       let data;
       try {
         data = await res.json();
@@ -323,19 +703,41 @@ export default function AuctionDetailPage() {
           ...prev,
           {
             id: Date.now() + Math.random(),
-            message: 'Invalid server response when placing bid',
+            message: '⚠️ Invalid server response when placing bid',
             type: 'error',
             timestamp: Date.now(),
           },
         ]);
         return;
       }
+      
       if (res.ok && data.success) {
+        // Update local state immediately for better UX
+        setAuction((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            lots: prev.lots.map(l => 
+              l.id === lotId 
+                ? { 
+                    ...l, 
+                    currentBid: data.currentBid || proposedBid,
+                    bidHistory: data.bidHistory || [...(l.bidHistory || []), {
+                      bidderEmail: userEmail,
+                      amount: proposedBid,
+                      timestamp: new Date().toISOString()
+                    }]
+                  }
+                : l
+            )
+          };
+        });
+
         setNotifications((prev) => [
           ...prev,
           {
             id: Date.now() + Math.random(),
-            message: `Bid placed on Lot!`,
+            message: `🎉 Bid successful! You bid R${proposedBid.toLocaleString()}`,
             type: 'success',
             timestamp: Date.now(),
           },
@@ -345,7 +747,7 @@ export default function AuctionDetailPage() {
           ...prev,
           {
             id: Date.now() + Math.random(),
-            message: (data && data.message) ? data.message : 'Bid failed',
+            message: `❌ ${(data && data.message) ? data.message : 'Bid failed'}`,
             type: 'error',
             timestamp: Date.now(),
           },
@@ -356,7 +758,7 @@ export default function AuctionDetailPage() {
         ...prev,
         {
           id: Date.now() + Math.random(),
-          message: 'Network error placing bid: ' + (e instanceof Error ? e.message : ''),
+          message: '🚫 Network error placing bid: ' + (e instanceof Error ? e.message : ''),
           type: 'error',
           timestamp: Date.now(),
         },
@@ -422,6 +824,12 @@ export default function AuctionDetailPage() {
     }, 100);
   };
   const closeImageModal = () => setImageModal({ isOpen: false, images: [], currentIndex: 0, lotTitle: '' });
+  
+  // Video modal functions
+  const openVideoModal = (videoUrl: string, lotTitle: string) => {
+    setVideoModal({ isOpen: true, videoUrl, lotTitle });
+  };
+  const closeVideoModal = () => setVideoModal({ isOpen: false, videoUrl: '', lotTitle: '' });
   const navigateModalImage = (direction: 'prev' | 'next') => {
     setImageModal((prev) => {
       const newIndex = direction === 'next'
@@ -633,16 +1041,26 @@ export default function AuctionDetailPage() {
 
       {/* Auction Hero Section */}
       <div className="relative h-96 overflow-hidden rounded-b-3xl shadow-2xl">
-        <Image
-          src={auctionImage}
-          alt={auction.title || 'Auction Image'}
-          fill
-          className="object-cover scale-105 blur-[1px] brightness-75"
-          onError={(e) => {
-            const target = e.target as HTMLImageElement;
-                                  target.src = '';
-          }}
-        />
+        {auctionImage && auctionImage.trim() !== "" ? (
+          <Image
+            src={auctionImage.startsWith('http') ? auctionImage : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${auctionImage}`}
+            alt={`${auction.title} - Auction Banner`}
+            fill
+            className="object-cover w-full h-full"
+            priority
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.style.display = 'none';
+            }}
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-[#0f2027] via-[#2c5364] to-[#232526] flex items-center justify-center">
+            <div className="text-center">
+              <TrophyIcon className="w-24 h-24 text-white/20 mx-auto mb-4" />
+              <p className="text-white/40 text-lg font-light">No banner image available</p>
+            </div>
+          </div>
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
         {/* Hero Content */}
         <div className="absolute bottom-0 left-0 right-0 p-8">
@@ -743,6 +1161,8 @@ export default function AuctionDetailPage() {
                       biddingLoading={biddingLoading}
                       handlePlaceBid={handlePlaceBid}
                       openImageModal={openImageModal}
+                      openVideoModal={openVideoModal}
+                      sniperProtectionActive={sniperProtections[lot.id]}
                     />
                   ))}
                 </div>
@@ -755,7 +1175,111 @@ export default function AuctionDetailPage() {
               )}
             </motion.div>
           )}
+        </AnimatePresence>
 
+        {/* Enhanced Image Modal with Gallery Support */}
+        <AnimatePresence>
+          {imageModal.isOpen && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl"
+              onClick={closeImageModal}
+            >
+              <div className="absolute inset-4 flex items-center justify-center">
+                <div className="relative max-w-5xl max-h-full" onClick={e => e.stopPropagation()}>
+                  {/* Close button */}
+                  <button
+                    className="absolute -top-12 right-0 text-white hover:text-red-400 text-2xl font-bold z-10 bg-black/50 rounded-full p-2"
+                    onClick={closeImageModal}
+                  >
+                    ×
+                  </button>
+                  
+                  {/* Navigation arrows */}
+                  {imageModal.images.length > 1 && (
+                    <>
+                      <button
+                        className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white hover:text-green-400 text-4xl font-bold z-10 bg-black/50 rounded-full p-2"
+                        onClick={() => navigateModalImage('prev')}
+                      >
+                        ‹
+                      </button>
+                      <button
+                        className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white hover:text-green-400 text-4xl font-bold z-10 bg-black/50 rounded-full p-2"
+                        onClick={() => navigateModalImage('next')}
+                      >
+                        ›
+                      </button>
+                    </>
+                  )}
+                  
+                  {/* Main image */}
+                  <div className="relative">
+                    <Image
+                      src={
+                        imageModal.images[imageModal.currentIndex]?.startsWith('http') 
+                          ? imageModal.images[imageModal.currentIndex]
+                          : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${imageModal.images[imageModal.currentIndex]}`
+                      }
+                      alt={`${imageModal.lotTitle} - Image ${imageModal.currentIndex + 1}`}
+                      width={800}
+                      height={600}
+                      className="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = '/placeholder-lot.svg';
+                      }}
+                    />
+                    
+                    {/* Image counter */}
+                    {imageModal.images.length > 1 && (
+                      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/70 text-white px-4 py-2 rounded-lg text-sm font-bold">
+                        {imageModal.currentIndex + 1} of {imageModal.images.length}
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Image title */}
+                  <div className="mt-4 text-center">
+                    <h3 className="text-white text-xl font-bold">{imageModal.lotTitle}</h3>
+                  </div>
+                  
+                  {/* Thumbnail strip for navigation */}
+                  {imageModal.images.length > 1 && (
+                    <div className="mt-6 flex justify-center gap-2 max-w-full overflow-x-auto pb-2">
+                      {imageModal.images.map((img, idx) => (
+                        <button
+                          key={idx}
+                          className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 ${
+                            idx === imageModal.currentIndex ? 'border-green-400' : 'border-white/30'
+                          }`}
+                          onClick={() => setImageModal(prev => ({ ...prev, currentIndex: idx }))}
+                        >
+                          <Image
+                            src={
+                              img.startsWith('http') 
+                                ? img
+                                : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${img}`
+                            }
+                            alt={`Thumbnail ${idx + 1}`}
+                            width={64}
+                            height={64}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.src = '/placeholder-lot.svg';
+                            }}
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          )}
           {activeTab === 'details' && (
             <motion.div
               key="details"
@@ -790,9 +1314,64 @@ export default function AuctionDetailPage() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Video Modal */}
+        <AnimatePresence>
+          {videoModal.isOpen && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl"
+              onClick={closeVideoModal}
+            >
+              <div className="absolute inset-4 flex items-center justify-center">
+                <div className="relative max-w-4xl max-h-full w-full" onClick={e => e.stopPropagation()}>
+                  {/* Close button */}
+                  <button
+                    className="absolute -top-12 right-0 text-white hover:text-red-400 text-2xl font-bold z-10 bg-black/50 rounded-full p-2"
+                    onClick={closeVideoModal}
+                  >
+                    ×
+                  </button>
+                  
+                  {/* Video player */}
+                  <div className="relative bg-black rounded-lg overflow-hidden shadow-2xl">
+                    <div className="aspect-video">
+                      {videoModal.videoUrl.includes('youtube.com') || videoModal.videoUrl.includes('youtu.be') ? (
+                        <iframe
+                          src={videoModal.videoUrl.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')}
+                          title={`${videoModal.lotTitle} - Video`}
+                          frameBorder="0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                          className="w-full h-full"
+                        />
+                      ) : (
+                        <video
+                          src={videoModal.videoUrl}
+                          controls
+                          className="w-full h-full"
+                          onError={(e) => {
+                            console.error('Video failed to load:', e);
+                          }}
+                        >
+                          Your browser does not support the video tag.
+                        </video>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Video title */}
+                  <div className="mt-4 text-center">
+                    <h3 className="text-white text-xl font-bold">{videoModal.lotTitle}</h3>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
 }
-
-// Lot Card Component moved inside AuctionDetailPage for access to state/handlers

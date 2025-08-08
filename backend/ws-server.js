@@ -6,10 +6,22 @@ const path = require('path');
 const server = http.createServer();
 const wss = new WebSocket.Server({ 
   server,
-  // Allow connections from anywhere in production
+  // Allow connections from anywhere in development, validate in production
   verifyClient: (info) => {
-    // In production, you might want to add origin validation here
-    return true;
+    // Allow all origins in development
+    if (process.env.NODE_ENV === 'development') {
+      return true;
+    }
+    
+    // In production, validate origin
+    const origin = info.origin;
+    const allowedOrigins = [
+      'https://www.all4youauctions.co.za',
+      'https://all4youauctions.co.za',
+      'http://localhost:3000' // For local testing
+    ];
+    
+    return allowedOrigins.includes(origin);
   }
 });
 

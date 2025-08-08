@@ -44,6 +44,12 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'http',
+        hostname: 'localhost',
+        port: '5000',
+        pathname: '/uploads/**',
+      },
+      {
+        protocol: 'http',
         hostname: 'all4youauctions.co.za',
         port: '5000',
         pathname: '/uploads/**',
@@ -51,6 +57,11 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: '*.onrender.com',
+        pathname: '/uploads/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'api.all4youauctions.co.za',
         pathname: '/uploads/**',
       },
     ],
