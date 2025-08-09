@@ -244,85 +244,102 @@ export default function Header() {
 
         {/* MOBILE NAV */}
         {menuOpen && (
-          <div className="md:hidden fixed top-0 left-0 w-full h-full bg-black bg-opacity-95 z-50 shadow-2xl flex flex-col items-start justify-start pt-20 pb-8 px-0 overflow-y-auto">
-            <div className="w-full space-y-4 px-4">
-              
-              {/* General Links */}
-              <Link href="/terms" className="block w-full px-4 py-4 bg-gray-900 text-white rounded-lg transition-all duration-200 hover:bg-gray-700 text-lg font-bold border border-gray-700" onClick={() => setMenuOpen(false)}>
-                📋 Terms
-              </Link>
-              <Link href="/contact" className="block w-full px-4 py-4 bg-gray-900 text-white rounded-lg transition-all duration-200 hover:bg-gray-700 text-lg font-bold border border-gray-700" onClick={() => setMenuOpen(false)}>
-                📞 Contact
-              </Link>
-              
-              {/* User-only links */}
-              {isLoggedIn && (
-                <>
-                  <Link href="/auctions" className="block w-full px-4 py-4 bg-yellow-600 text-white rounded-xl transition-all duration-200 hover:bg-yellow-700 text-lg font-bold shadow border-2 border-yellow-400" onClick={() => setMenuOpen(false)}>
-                    🏛️ Auctions
-                  </Link>
-                  <Link href="/auctions/past" className="block w-full px-4 py-4 bg-yellow-500 text-white rounded-xl transition-all duration-200 hover:bg-yellow-600 text-lg font-bold shadow border-2 border-yellow-400" onClick={() => setMenuOpen(false)}>
-                    📜 Past Auctions
-                  </Link>
-                  <Link href="/watchlist" className="block w-full px-4 py-4 bg-pink-600 text-white rounded-xl transition-all duration-200 hover:bg-pink-700 text-lg font-bold shadow border-2 border-pink-400" onClick={() => setMenuOpen(false)}>
-                    ❤️ Watchlist
-                  </Link>
-                  <Link href="/account/buyer" className="block w-full px-4 py-4 bg-blue-700 text-white rounded-xl transition-all duration-200 hover:bg-blue-800 text-lg font-bold shadow border-2 border-blue-400" onClick={() => setMenuOpen(false)}>
-                    🛒 Buyer Invoices
-                  </Link>
-                  <Link href="/account/seller" className="block w-full px-4 py-4 bg-blue-700 text-white rounded-xl transition-all duration-200 hover:bg-blue-800 text-lg font-bold shadow border-2 border-blue-400" onClick={() => setMenuOpen(false)}>
-                    💰 Seller Invoices
-                  </Link>
-                  <Link href="/my-auctions/invoices" className="block w-full px-4 py-4 bg-gray-800 text-white rounded-xl transition-all duration-200 hover:bg-gray-900 text-lg font-bold shadow border-2 border-gray-700" onClick={() => setMenuOpen(false)}>
-                    📊 My Auctions
-                  </Link>
-                  <Link href="/sell" className="block w-full px-4 py-4 bg-green-600 text-white rounded-xl transition-all duration-200 hover:bg-green-700 font-bold shadow-lg border-2 border-green-400 text-lg" onClick={() => setMenuOpen(false)}>
-                    💎 Sell Item
-                  </Link>
-                </>
-              )}
-
-              {/* Admin links */}
-              {isAdmin && (
-                <>
-                  <Link href="/admin/inbox" className="block w-full px-4 py-4 bg-red-700 text-white rounded-lg transition-all duration-200 hover:bg-red-800 text-lg font-bold border-2 border-red-500" onClick={() => setMenuOpen(false)}>
-                    🔧 Admin Inbox
-                  </Link>
-                  <Link href="/admin/refunds" className="block w-full px-4 py-4 bg-orange-700 text-white rounded-lg transition-all duration-200 hover:bg-orange-800 text-lg font-bold border-2 border-orange-500" onClick={() => setMenuOpen(false)}>
-                    💸 Refunds
-                  </Link>
-                </>
-              )}
-
-              {/* Authentication */}
-              {!isLoggedIn ? (
-                <div className="pt-3 mt-3 border-t border-gray-600 w-full">
-                  <Link href="/login" className="block w-full px-4 py-4 bg-yellow-700 text-white rounded-lg transition-all duration-200 hover:bg-yellow-800 text-lg font-bold border-2 border-yellow-600 text-center mb-2" onClick={() => setMenuOpen(false)}>
-                    🔐 Login
-                  </Link>
-                  <Link href="/register" className="block w-full px-4 py-4 bg-yellow-600 text-white rounded-lg transition-all duration-200 hover:bg-yellow-700 text-lg font-bold border-2 border-yellow-500 text-center" onClick={() => setMenuOpen(false)}>
-                    ✨ Register
-                  </Link>
-                </div>
-              ) : (
-                <div className="pt-3 mt-3 border-t border-gray-600">
-                  <button 
-                    onClick={() => {
-                      localStorage.removeItem('userEmail');
-                      localStorage.removeItem('token');
-                      setIsLoggedIn(false);
-                      setUserEmail('');
-                      setIsAdmin(false);
-                      setMenuOpen(false);
-                      window.location.href = '/';
-                    }}
-                    className="w-full px-4 py-3 bg-red-700 text-white rounded-lg transition-all duration-200 hover:bg-red-800 font-bold border border-red-600 text-center"
-                  >
-                    🚪 Logout
-                  </button>
-                </div>
-              )}
+          <div className="md:hidden fixed inset-0 w-screen h-screen bg-black/95 backdrop-blur-md z-[9999] flex flex-col">
+            {/* Close button and header */}
+            <div className="flex justify-between items-center p-6 pt-8 border-b border-white/20">
+              <span className="text-white text-2xl font-bold">Menu</span>
+              <button
+                onClick={() => setMenuOpen(false)}
+                className="text-white text-3xl hover:text-yellow-400 transition-all duration-200 p-2"
+              >
+                ✕
+              </button>
             </div>
+
+            {/* Scrollable menu content */}
+            <div className="flex-1 overflow-y-auto px-6 py-6">
+              <div className="space-y-4 max-w-sm mx-auto">
+                
+                {/* General Links */}
+                <Link href="/terms" className="block w-full px-6 py-4 bg-gray-800/80 text-white rounded-xl transition-all duration-200 hover:bg-gray-700/80 hover:scale-[1.02] text-lg font-bold border-2 border-gray-600/50 text-center" onClick={() => setMenuOpen(false)}>
+                  📋 Terms
+                </Link>
+                <Link href="/contact" className="block w-full px-6 py-4 bg-gray-800/80 text-white rounded-xl transition-all duration-200 hover:bg-gray-700/80 hover:scale-[1.02] text-lg font-bold border-2 border-gray-600/50 text-center" onClick={() => setMenuOpen(false)}>
+                  📞 Contact
+                </Link>
+                
+                {/* User-only links */}
+                {isLoggedIn && (
+                  <>
+                    <Link href="/auctions" className="block w-full px-6 py-4 bg-yellow-600/90 text-white rounded-xl transition-all duration-200 hover:bg-yellow-700/90 hover:scale-[1.02] text-lg font-bold shadow-lg border-2 border-yellow-400/50 text-center" onClick={() => setMenuOpen(false)}>
+                      🏛️ Auctions
+                    </Link>
+                    <Link href="/auctions/past" className="block w-full px-6 py-4 bg-yellow-500/90 text-white rounded-xl transition-all duration-200 hover:bg-yellow-600/90 hover:scale-[1.02] text-lg font-bold shadow-lg border-2 border-yellow-400/50 text-center" onClick={() => setMenuOpen(false)}>
+                      📜 Past Auctions
+                    </Link>
+                    <Link href="/watchlist" className="block w-full px-6 py-4 bg-pink-600/90 text-white rounded-xl transition-all duration-200 hover:bg-pink-700/90 hover:scale-[1.02] text-lg font-bold shadow-lg border-2 border-pink-400/50 text-center" onClick={() => setMenuOpen(false)}>
+                      ❤️ Watchlist
+                    </Link>
+                    <Link href="/account/buyer" className="block w-full px-6 py-4 bg-blue-700/90 text-white rounded-xl transition-all duration-200 hover:bg-blue-800/90 hover:scale-[1.02] text-lg font-bold shadow-lg border-2 border-blue-400/50 text-center" onClick={() => setMenuOpen(false)}>
+                      🛒 Buyer Invoices
+                    </Link>
+                    <Link href="/account/seller" className="block w-full px-6 py-4 bg-blue-700/90 text-white rounded-xl transition-all duration-200 hover:bg-blue-800/90 hover:scale-[1.02] text-lg font-bold shadow-lg border-2 border-blue-400/50 text-center" onClick={() => setMenuOpen(false)}>
+                      💰 Seller Invoices
+                    </Link>
+                    <Link href="/my-auctions/invoices" className="block w-full px-6 py-4 bg-gray-700/90 text-white rounded-xl transition-all duration-200 hover:bg-gray-800/90 hover:scale-[1.02] text-lg font-bold shadow-lg border-2 border-gray-500/50 text-center" onClick={() => setMenuOpen(false)}>
+                      📊 My Auctions
+                    </Link>
+                    <Link href="/sell" className="block w-full px-6 py-4 bg-green-600/90 text-white rounded-xl transition-all duration-200 hover:bg-green-700/90 hover:scale-[1.02] font-bold shadow-lg border-2 border-green-400/50 text-lg text-center" onClick={() => setMenuOpen(false)}>
+                      💎 Sell Item
+                    </Link>
+                  </>
+                )}
+
+                {/* Admin links */}
+                {isAdmin && (
+                  <>
+                    <Link href="/admin/inbox" className="block w-full px-6 py-4 bg-red-700/90 text-white rounded-xl transition-all duration-200 hover:bg-red-800/90 hover:scale-[1.02] text-lg font-bold border-2 border-red-500/50 text-center" onClick={() => setMenuOpen(false)}>
+                      🔧 Admin Inbox
+                    </Link>
+                    <Link href="/admin/refunds" className="block w-full px-6 py-4 bg-orange-700/90 text-white rounded-xl transition-all duration-200 hover:bg-orange-800/90 hover:scale-[1.02] text-lg font-bold border-2 border-orange-500/50 text-center" onClick={() => setMenuOpen(false)}>
+                      💸 Refunds
+                    </Link>
+                  </>
+                )}
+
+                {/* Authentication Section */}
+                <div className="pt-6 mt-6 border-t-2 border-white/20">
+                  {!isLoggedIn ? (
+                    <div className="space-y-4">
+                      <Link href="/login" className="block w-full px-6 py-5 bg-yellow-700/90 text-white rounded-xl transition-all duration-200 hover:bg-yellow-800/90 hover:scale-[1.02] text-xl font-bold border-2 border-yellow-600/50 text-center shadow-lg" onClick={() => setMenuOpen(false)}>
+                        🔐 Login
+                      </Link>
+                      <Link href="/register" className="block w-full px-6 py-5 bg-gradient-to-r from-yellow-600 to-orange-500 text-white rounded-xl transition-all duration-200 hover:from-yellow-700 hover:to-orange-600 hover:scale-[1.02] text-xl font-bold border-2 border-yellow-400/50 text-center shadow-lg" onClick={() => setMenuOpen(false)}>
+                        ✨ Register
+                      </Link>
+                    </div>
+                  ) : (
+                    <button 
+                      onClick={() => {
+                        localStorage.removeItem('userEmail');
+                        localStorage.removeItem('token');
+                        setIsLoggedIn(false);
+                        setUserEmail('');
+                        setIsAdmin(false);
+                        setMenuOpen(false);
+                        window.location.href = '/';
+                      }}
+                      className="w-full px-6 py-5 bg-red-700/90 text-white rounded-xl transition-all duration-200 hover:bg-red-800/90 hover:scale-[1.02] font-bold border-2 border-red-600/50 text-center text-xl shadow-lg"
+                    >
+                      🚪 Logout
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Safe area bottom padding for devices with home indicator */}
+            <div className="pb-safe-area-inset-bottom bg-black/20"></div>
           </div>
         )}
       </header>
